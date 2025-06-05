@@ -9,8 +9,7 @@ namespace BookStoreApi.Models.DTOs
         public string Title { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, MinimumLength = 2)]
-        public string Author { get; set; } = string.Empty;
+        public int AuthorId { get; set; }
 
         [Range(1000, 2100)]
         public int PublicationYear { get; set; }
@@ -20,5 +19,9 @@ namespace BookStoreApi.Models.DTOs
 
         [StringLength(10000000, MinimumLength =0)]
         public string Content { get; set; }
+
+        
+
+        public ICollection<int> PublisherIds { get; set; } = new List<int>();
     }
 }

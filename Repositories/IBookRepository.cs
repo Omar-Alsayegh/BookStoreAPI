@@ -1,5 +1,5 @@
 ﻿
-using BookStoreApi.Models;
+using BookStoreApi.Entities;
 
 namespace BookStoreApi.Repositories
 {

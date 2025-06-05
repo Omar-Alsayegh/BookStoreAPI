@@ -1,5 +1,5 @@
 ﻿using BookStoreApi.Data;
-using BookStoreApi.Models;
+using BookStoreApi.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreApi.Repositories
@@ -13,7 +13,9 @@ namespace BookStoreApi.Repositories
 
            public async Task<IEnumerable<Book>> GetBooksByAuthorAsync(string authorName)
         {
-            return await _context.Books.Where(b => b.Author == authorName).ToListAsync();
+            return await _context.Books.Include(b=> b.Author)
+                .Where(b=>b.Author.Name == authorName)
+                .ToListAsync();
         }
     
     

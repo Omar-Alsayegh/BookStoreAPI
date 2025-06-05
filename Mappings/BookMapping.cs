@@ -1,10 +1,11 @@
-﻿using BookStoreApi.Models;
+﻿using BookStoreApi.Entities;
+using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BookStoreApi.Extensions
 {
-    public static class BookMappingExtensions
+    public static class BookMapping
     {
       //Convert the createbook entity to book entity
       public static Book CreateToBook (this CreateBookDto createBookDto)
@@ -16,7 +17,7 @@ namespace BookStoreApi.Extensions
             return new Book
             {
                 Title = createBookDto.Title,
-                Author=createBookDto.Author,
+                AuthorId=createBookDto.AuthorId,
                 PublicationYear = createBookDto.PublicationYear,
                 Price=createBookDto.Price,
                 Content= createBookDto.Content,
@@ -34,7 +35,7 @@ namespace BookStoreApi.Extensions
                 throw new ArgumentNullException(nameof(updateBookDto), "UpdateBookDto cannot be null.");
             }
             entity.Title = updateBookDto.Title;
-            entity.Author = updateBookDto.Author;
+            entity.AuthorId = updateBookDto.AuthorId;
             entity.PublicationYear = updateBookDto.PublicationYear;
             entity.Price = updateBookDto.Price;
             entity.Content = updateBookDto.Content;
@@ -45,13 +46,19 @@ namespace BookStoreApi.Extensions
                 
                 throw new ArgumentNullException(nameof(entity), "Book entity cannot be null.");
             }
+            if (entity.Author == null)
+            {
+                throw new InvalidOperationException("Author navigation property was not loaded for Book ToDto conversion.");
+            }
             return new BookDto
             {
+               Id=entity.Id,
                Title = entity.Title,
-               Author = entity.Author,
                PublicationYear = entity.PublicationYear,
                Price=entity.Price,
-               Content = entity.Content
+               Content = entity.Content,
+               Author = entity.Author.ToDto(),
+               Publishers=entity.BookPublishers?.Select(bp=>bp.Publisher.ToDto()).ToList() ?? new List<PublisherDto>()
             };
            
 

@@ -7,7 +7,7 @@ namespace BookStoreApi.Models.DTOs
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-        [MaxLength(10)]
+        [Required]
         public DateTime Birthdate { get; set; }
     }
 }

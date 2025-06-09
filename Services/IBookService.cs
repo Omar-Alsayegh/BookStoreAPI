@@ -7,7 +7,7 @@ namespace BookStoreApi.Services
         Task<IEnumerable<BookDto>> GetAllBooksAsync();
         Task<BookDto?> GetBookByIdAsync(int id);
         Task<BookDto> CreateBookAsync(CreateBookDto createDto);
-        Task<bool> UpdateBookAsync(int id, UpdateBookDto updateDto); 
+        Task<bool> UpdateBookAsync(int id, UpdateBookDto updateDto);
         Task<bool> DeleteBookAsync(int id);
     }
 }

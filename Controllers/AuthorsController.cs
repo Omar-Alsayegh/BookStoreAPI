@@ -17,7 +17,7 @@ namespace BookStoreApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IAsyncEnumerable<AuthorDto>>> GetAllAuthors()
         {
-            var authors =await _authorService.GetAllAuthorsAsync();
+            var authors = await _authorService.GetAllAuthorsAsync();
             return Ok(authors);
         }
         [HttpGet("{id}")]
@@ -33,22 +33,15 @@ namespace BookStoreApi.Controllers
         [HttpPost]
         public async Task<ActionResult<AuthorDto>> PostAuthor([FromBody] CreateAuthorDto createAuthor)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             var newAuthor = await _authorService.CreateAuthorAsync(createAuthor);
             return CreatedAtAction(nameof(GetAuthorById), new { id = newAuthor.Id }, newAuthor);
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor(int id, [FromBody] UpdateAuthorDto updateAuthor)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var isUpdated = await _authorService.UpdateAuthorAsync(id, updateAuthor);
-            if (!isUpdated)
+            var success = await _authorService.UpdateAuthorAsync(id, updateAuthor);
+
+            if (!success)
             {
                 return NotFound();
             }
@@ -58,13 +51,13 @@ namespace BookStoreApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
-            var isDelete = await _authorService.DeleteAuthorAsync(id);
-            if (!isDelete)
+            var success = await _authorService.DeleteAuthorAsync(id);
+
+            if (!success)
             {
                 return NotFound();
             }
             return NoContent();
-
         }
     }
 }

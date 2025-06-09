@@ -5,22 +5,23 @@ namespace BookStoreApi.Models.DTOs
     public class CreateBookDto
     {
         [Required]
-        [StringLength(100, MinimumLength = 2)]
+        [StringLength(200)]
         public string Title { get; set; } = string.Empty;
 
-        [Required]
-        public int AuthorId { get; set; }
-
-        [Range(1000,2030)]
+        [Range(1000, 2030)]
         public int PublicationYear { get; set; }
         [Required]
-        [Range(0,10000)]
+        [Range(0, 10000)]
         public decimal Price { get; set; }
 
         [StringLength(10000000, MinimumLength = 0)]
         public string Content { get; set; }
+        
+        [Required]
+        public int PublisherId { get; set; }
 
-
-        public ICollection<int> PublisherIds { get; set; } = new List<int>();
+        [Required]
+        [MinLength(1, ErrorMessage = "A book must have at least one author.")]
+        public List<int> AuthorIds { get; set; } = new List<int>();
     }
 }

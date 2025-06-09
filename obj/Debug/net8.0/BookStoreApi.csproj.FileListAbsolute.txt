@@ -1,3 +1,4 @@
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\nlog.config
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\appsettings.json
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\BookStoreApi.staticwebassets.endpoints.json
@@ -52,6 +53,9 @@ C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\NLog.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\NLog.Extensions.Logging.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\NLog.Web.AspNetCore.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll

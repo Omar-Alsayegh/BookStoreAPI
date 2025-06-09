@@ -156,20 +156,15 @@
   },
   {
     "ContainingType": "BookStoreApi.Controllers.BooksController",
-    "Method": "PutBook",
-    "RelativePath": "api/Books",
-    "HttpMethod": "PUT",
+    "Method": "GetBook",
+    "RelativePath": "api/Books/{id}",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "updateBook",
-        "Type": "BookStoreApi.Models.DTOs.UpdateBookDto",
         "IsRequired": true
       }
     ],
@@ -187,15 +182,20 @@
   },
   {
     "ContainingType": "BookStoreApi.Controllers.BooksController",
-    "Method": "GetBook",
+    "Method": "PutBook",
     "RelativePath": "api/Books/{id}",
-    "HttpMethod": "GET",
+    "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "id",
         "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "updateBook",
+        "Type": "BookStoreApi.Models.DTOs.UpdateBookDto",
         "IsRequired": true
       }
     ],

@@ -1,10 +1,13 @@
-﻿namespace BookStoreApi.Entities
+﻿using BookStoreApi.Entities;
+namespace BookStoreApi.Entities
 {
     public class Publisher
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
-        public ICollection<BookPublisher> BookPublishers { get; set; } = new List<BookPublisher>();
+        public string Name { get; set; } = string.Empty;
+        //public string Address { get; set; }
+
+        //1 to many rel
+        public ICollection<Book> Books { get; set; } = new List<Book>();
     }
 }

@@ -10,10 +10,10 @@ namespace BookStoreApi.Repositories
     {
         protected readonly ApplicationDbContext _context;
         protected readonly DbSet<TEntity> _dbSet;
-    public GenericRepository(ApplicationDbContext context)
+        public GenericRepository(ApplicationDbContext context)
         {
             _context = context;
-            _dbSet =context.Set<TEntity>();
+            _dbSet = context.Set<TEntity>();
         }
 
         public async Task AddAsync(TEntity entity)
@@ -23,9 +23,10 @@ namespace BookStoreApi.Repositories
 
         public async Task DeleteAsync(int id)
         {
-          var entityToDelete = await _dbSet.FindAsync(id);
-            if (entityToDelete != null) { 
-            
+            var entityToDelete = await _dbSet.FindAsync(id);
+            if (entityToDelete != null)
+            {
+
                 _dbSet.Remove(entityToDelete);
             }
         }
@@ -43,7 +44,7 @@ namespace BookStoreApi.Repositories
 
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-           return await _dbSet.ToListAsync();
+            return await _dbSet.ToListAsync();
         }
 
         public virtual async Task<TEntity?> GetByIdAsync(int id)
@@ -53,7 +54,7 @@ namespace BookStoreApi.Repositories
 
         public async Task SaveChangesAsync()
         {
-           await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public virtual Task UpdateAsync(TEntity entity)

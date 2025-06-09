@@ -5,10 +5,16 @@ using BookStoreApi.Extensions;
 
 namespace BookStoreApi.Services
 {
-    
+
     public class PublisherService : IPublisherService
     {
         private readonly IPublisherRepository _publisherRepository;
+
+        public PublisherService(IPublisherRepository publisherRepository)
+        {
+            _publisherRepository = publisherRepository;
+        }
+
         public async Task<PublisherDto> CreatePublisherAsync(CreatePublisherDto createDto)
         {
             var newPublisher = createDto.ToEntity();
@@ -33,7 +39,7 @@ namespace BookStoreApi.Services
         public async Task<IEnumerable<PublisherDto>> GetAllPublishersAsync()
         {
             var Publishers = await _publisherRepository.GetAllAsync();
-            return Publishers.Select(x => x.ToDto());
+            return Publishers.Select(x => x.ToDto()).ToList();
         }
 
         public async Task<PublisherDto?> GetPublisherByIdAsync(int id)
@@ -53,7 +59,7 @@ namespace BookStoreApi.Services
             await _publisherRepository.UpdateAsync(updatedPublisher);
             await _publisherRepository.SaveChangesAsync();
             return true;
-            
+
         }
     }
 }

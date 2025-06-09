@@ -7,19 +7,15 @@ namespace BookStoreApi.Mappings
     {
         public static Author CreateToEntity(this CreateAuthorDto createDto)
         {
-            if (createDto == null) throw new ArgumentNullException(nameof(createDto));
             return new Author
             {
                 Name = createDto.Name,
-                Birthdate= createDto.Birthdate
+                Birthdate = createDto.Birthdate
             };
         }
 
         public static void UpdateFromDto(this Author entity, UpdateAuthorDto updateDto)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (updateDto == null) throw new ArgumentNullException(nameof(updateDto));
-
             entity.Name = updateDto.Name;
             entity.Birthdate = updateDto.Birthdate;
         }

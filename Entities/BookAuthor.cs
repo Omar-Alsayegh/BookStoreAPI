@@ -1,10 +1,10 @@
 ﻿namespace BookStoreApi.Entities
 {
-    public class BookPublisher
+    public class BookAuthor
     {
         public int BookId { get; set; }
-        public int PublisherId { get; set; }
+        public int AuthorId { get; set; }
         public Book Book { get; set; } = null!;
-        public Publisher Publisher { get; set; } = null!;
+        public Author Author { get; set; } = null!;
     }
 }

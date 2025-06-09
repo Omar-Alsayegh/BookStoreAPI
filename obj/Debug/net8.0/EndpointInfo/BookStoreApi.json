@@ -272,6 +272,46 @@
             }
           }
         }
+      }
+    },
+    "/api/Books/{id}": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookDto"
+                }
+              }
+            }
+          }
+        }
       },
       "put": {
         "tags": [
@@ -280,7 +320,8 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -306,46 +347,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Books/{id}": {
-      "get": {
-        "tags": [
-          "Books"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -620,15 +621,15 @@
             "type": "string",
             "nullable": true
           },
-          "author": {
-            "$ref": "#/components/schemas/AuthorDto"
-          },
-          "publishers": {
+          "authors": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PublisherDto"
+              "$ref": "#/components/schemas/AuthorDto"
             },
             "nullable": true
+          },
+          "publisher": {
+            "$ref": "#/components/schemas/PublisherDto"
           }
         },
         "additionalProperties": false
@@ -645,7 +646,6 @@
             "type": "string"
           },
           "birthdate": {
-            "maxLength": 10,
             "type": "string",
             "format": "date-time"
           }
@@ -654,20 +654,17 @@
       },
       "CreateBookDto": {
         "required": [
-          "authorId",
+          "authorIds",
           "price",
+          "publisherId",
           "title"
         ],
         "type": "object",
         "properties": {
           "title": {
-            "maxLength": 100,
-            "minLength": 2,
+            "maxLength": 200,
+            "minLength": 0,
             "type": "string"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int32"
           },
           "publicationYear": {
             "maximum": 2030,
@@ -687,13 +684,17 @@
             "type": "string",
             "nullable": true
           },
-          "publisherIds": {
+          "publisherId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authorIds": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "type": "integer",
               "format": "int32"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
@@ -708,11 +709,6 @@
             "maxLength": 100,
             "minLength": 1,
             "type": "string"
-          },
-          "address": {
-            "maxLength": 200,
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -727,16 +723,13 @@
           "name": {
             "type": "string",
             "nullable": true
-          },
-          "address": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
       },
       "UpdateAuthorDto": {
         "required": [
+          "birthdate",
           "name"
         ],
         "type": "object",
@@ -747,7 +740,6 @@
             "type": "string"
           },
           "birthdate": {
-            "maxLength": 10,
             "type": "string",
             "format": "date-time"
           }
@@ -757,13 +749,15 @@
       "UpdateBookDto": {
         "required": [
           "authorId",
+          "authorIds",
+          "publisherId",
           "title"
         ],
         "type": "object",
         "properties": {
           "title": {
-            "maxLength": 100,
-            "minLength": 2,
+            "maxLength": 200,
+            "minLength": 0,
             "type": "string"
           },
           "authorId": {
@@ -788,13 +782,17 @@
             "type": "string",
             "nullable": true
           },
-          "publisherIds": {
+          "publisherId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authorIds": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "type": "integer",
               "format": "int32"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
@@ -809,11 +807,6 @@
             "maxLength": 100,
             "minLength": 1,
             "type": "string"
-          },
-          "address": {
-            "maxLength": 200,
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "AoR5/SjR2Do=",
+  "dgSpecHash": "8UVrsSQ7RKQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\SmartPc\\Desktop\\Project\\dotnet_training\\Train\\BookstoreAPI\\BookStoreApi\\BookStoreApi\\BookStoreApi.csproj",
   "expectedPackageFiles": [
@@ -55,6 +55,9 @@
     "C:\\Users\\SmartPc\\.nuget\\packages\\microsoft.sqlserver.server\\1.0.0\\microsoft.sqlserver.server.1.0.0.nupkg.sha512",
     "C:\\Users\\SmartPc\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
     "C:\\Users\\SmartPc\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
+    "C:\\Users\\SmartPc\\.nuget\\packages\\nlog\\5.5.0\\nlog.5.5.0.nupkg.sha512",
+    "C:\\Users\\SmartPc\\.nuget\\packages\\nlog.extensions.logging\\5.5.0\\nlog.extensions.logging.5.5.0.nupkg.sha512",
+    "C:\\Users\\SmartPc\\.nuget\\packages\\nlog.web.aspnetcore\\5.5.0\\nlog.web.aspnetcore.5.5.0.nupkg.sha512",
     "C:\\Users\\SmartPc\\.nuget\\packages\\swashbuckle.aspnetcore\\6.6.2\\swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
     "C:\\Users\\SmartPc\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.6.2\\swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
     "C:\\Users\\SmartPc\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.6.2\\swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",

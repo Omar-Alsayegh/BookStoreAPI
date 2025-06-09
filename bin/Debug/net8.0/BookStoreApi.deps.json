@@ -13,6 +13,8 @@
           "Microsoft.AspNetCore.OpenApi": "8.0.16",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.5",
           "Microsoft.EntityFrameworkCore.Tools": "9.0.5",
+          "NLog.Extensions.Logging": "5.5.0",
+          "NLog.Web.AspNetCore": "5.5.0",
           "Swashbuckle.AspNetCore": "6.6.2"
         },
         "runtime": {
@@ -826,6 +828,38 @@
           }
         }
       },
+      "NLog/5.5.0": {
+        "runtime": {
+          "lib/netstandard2.0/NLog.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.5.0.3962"
+          }
+        }
+      },
+      "NLog.Extensions.Logging/5.5.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.5",
+          "Microsoft.Extensions.Logging": "9.0.5",
+          "NLog": "5.5.0"
+        },
+        "runtime": {
+          "lib/net8.0/NLog.Extensions.Logging.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.5.0.656"
+          }
+        }
+      },
+      "NLog.Web.AspNetCore/5.5.0": {
+        "dependencies": {
+          "NLog.Extensions.Logging": "5.5.0"
+        },
+        "runtime": {
+          "lib/net8.0/NLog.Web.AspNetCore.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.5.0.1230"
+          }
+        }
+      },
       "Swashbuckle.AspNetCore/6.6.2": {
         "dependencies": {
           "Microsoft.Extensions.ApiDescription.Server": "6.0.5",
@@ -1510,6 +1544,27 @@
       "sha512": "sha512-YqueG52R/Xej4VVbKuRIodjiAhV0HR/XVbLbNrJhCZnzjnSjgMJ/dCdV0akQQxavX6hp/LC6rqLGLcXeQYU7XA==",
       "path": "mono.texttemplating/3.0.0",
       "hashPath": "mono.texttemplating.3.0.0.nupkg.sha512"
+    },
+    "NLog/5.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-FCH8s7GWlonH5JXV9/EpeNJ8pRZQMVZOSWX3JrHPU8rzdHJhS5+lUGGvJIUOtzkGV1clYBFR0WXOI5FnUwVCMA==",
+      "path": "nlog/5.5.0",
+      "hashPath": "nlog.5.5.0.nupkg.sha512"
+    },
+    "NLog.Extensions.Logging/5.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-l8gxUThXCiV5Vcilz9SF2/mf39p9ccdm+V3zoadQIfnv5dMHiy6BH8PSF/9ptOMHfUXZI5qOlBTiO+YcoMY/4Q==",
+      "path": "nlog.extensions.logging/5.5.0",
+      "hashPath": "nlog.extensions.logging.5.5.0.nupkg.sha512"
+    },
+    "NLog.Web.AspNetCore/5.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MFDhgF9lHxq74Nmf3rNNHs/axsPpYgnZXNyAhKj9KKctJ0ZlrR+HR/184AQzu4h0KIH9SgRHeLgbWK9aCWWtRw==",
+      "path": "nlog.web.aspnetcore/5.5.0",
+      "hashPath": "nlog.web.aspnetcore.5.5.0.nupkg.sha512"
     },
     "Swashbuckle.AspNetCore/6.6.2": {
       "type": "package",

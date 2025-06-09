@@ -2,7 +2,7 @@
 
 namespace BookStoreApi.Repositories
 {
-    public interface IAuthorRepository: IGenericRepository<Author>
+    public interface IAuthorRepository : IGenericRepository<Author>
     {
 
     }

@@ -9,33 +9,37 @@ namespace BookStoreApi.Data
         {
         }
         public DbSet<Book> Books { get; set; }
-        public DbSet<Author>authors { get; set; }
-        public DbSet<Publisher> publisher { get; set; }
-        public DbSet<BookPublisher> bookPublishers { get; set; }
+        public DbSet<Author>Authors { get; set; }
+        public DbSet<Publisher> Publishers { get; set; }
+        public DbSet<BookAuthor> BookAuthors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Book>().Property(b => b.Price).HasPrecision(18, 2);
 
-            //One to many relationship 
-            modelBuilder.Entity<Book>()
-                .HasOne(b=>b.Author)
-                .WithMany(a => a.Books)
-                .HasForeignKey(b => b.AuthorId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<BookAuthor>()
+               .HasKey(ba => new { ba.BookId, ba.AuthorId }); // Define composite primary key
 
-            modelBuilder.Entity<BookPublisher>()
-                .HasKey(bp => new { bp.PublisherId, bp.BookId });
+            modelBuilder.Entity<BookAuthor>()
+                .HasOne(ba => ba.Book) // BookAuthor has one Book
+                .WithMany(b => b.BookAuthors) // Book has many BookAuthors
+                .HasForeignKey(ba => ba.BookId); // Foreign key to Book
 
-            modelBuilder.Entity<BookPublisher>()
-                .HasOne(bp => bp.Book)
-                .WithMany(b => b.BookPublishers)
-                .HasForeignKey(bp => bp.BookId);
-            modelBuilder.Entity<BookPublisher>()
-                .HasOne(bp => bp.Publisher)
-                .WithMany(b => b.BookPublishers)
-                .HasForeignKey(bp => bp.PublisherId);
+            modelBuilder.Entity<BookAuthor>()
+                .HasOne(ba => ba.Author) // BookAuthor has one Author
+                .WithMany(a => a.BookAuthors) // Author has many BookAuthors
+                .HasForeignKey(ba => ba.AuthorId); // Foreign key to Author
+
+            // Configure Book-Publisher One-to-Many relationship (Publisher has many Books)
+            modelBuilder.Entity<Publisher>()
+                .HasMany(p => p.Books) // Publisher has many Books
+                .WithOne(b => b.Publisher) // Book has one Publisher
+                .HasForeignKey(b => b.PublisherId) // Foreign key in Book
+                .OnDelete(DeleteBehavior.Restrict); // Optional: Prevent deleting publisher if books exist
+                                                    // Use .OnDelete(DeleteBehavior.Cascade) for automatic deletion of books.
+                                                    // Let's stick with Restrict for now, it's safer.
         }
 
     }

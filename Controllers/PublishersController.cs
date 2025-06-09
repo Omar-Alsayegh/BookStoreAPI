@@ -34,10 +34,6 @@ namespace BookStoreApi.Controllers
         [HttpPost]
         public async Task<ActionResult<PublisherDto>> CreatePublisher([FromBody] CreatePublisherDto createDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
             var newPublisher = await _publisherService.CreatePublisherAsync(createDto);
             return CreatedAtAction(nameof(GetPublisherById), new { id = newPublisher.Id }, newPublisher);
@@ -46,17 +42,13 @@ namespace BookStoreApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePublisher(int id, [FromBody] UpdatePublisherDto updateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
             var isUpdated = await _publisherService.UpdatePublisherAsync(id, updateDto);
             if (!isUpdated)
             {
-                return NotFound(); 
+                return NotFound();
             }
-            return NoContent(); 
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -65,7 +57,7 @@ namespace BookStoreApi.Controllers
             var isDeleted = await _publisherService.DeletePublisherAsync(id);
             if (!isDeleted)
             {
-                return NotFound(); 
+                return NotFound();
             }
             return NoContent();
         }

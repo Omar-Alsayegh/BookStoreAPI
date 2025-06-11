@@ -72,6 +72,7 @@ C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.Formats.Asn1.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.IO.Pipelines.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.Linq.Dynamic.Core.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.Memory.Data.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.Runtime.Caching.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll

@@ -5,10 +5,88 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Authors": {
+    "/api/account/register": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Author": {
       "get": {
         "tags": [
-          "Authors"
+          "Author"
+        ],
+        "parameters": [
+          {
+            "name": "Name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Birthdate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsDescending",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -44,7 +122,7 @@
       },
       "post": {
         "tags": [
-          "Authors"
+          "Author"
         ],
         "requestBody": {
           "content": {
@@ -89,10 +167,10 @@
         }
       }
     },
-    "/api/Authors/{id}": {
+    "/api/Author/{id}": {
       "get": {
         "tags": [
-          "Authors"
+          "Author"
         ],
         "parameters": [
           {
@@ -130,7 +208,7 @@
       },
       "put": {
         "tags": [
-          "Authors"
+          "Author"
         ],
         "parameters": [
           {
@@ -170,7 +248,7 @@
       },
       "delete": {
         "tags": [
-          "Authors"
+          "Author"
         ],
         "parameters": [
           {
@@ -194,6 +272,59 @@
       "get": {
         "tags": [
           "Books"
+        ],
+        "parameters": [
+          {
+            "name": "Title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "AuthorName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "PublisherName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsDescending",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -392,10 +523,61 @@
         }
       }
     },
+    "/api/LoggingTest": {
+      "get": {
+        "tags": [
+          "LoggingTest"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Publishers": {
       "get": {
         "tags": [
           "Publishers"
+        ],
+        "parameters": [
+          {
+            "name": "Name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsDescending",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -727,6 +909,30 @@
         },
         "additionalProperties": false
       },
+      "RegisterDto": {
+        "required": [
+          "emailAddress",
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "emailAddress": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateAuthorDto": {
         "required": [
           "birthdate",
@@ -748,7 +954,6 @@
       },
       "UpdateBookDto": {
         "required": [
-          "authorId",
           "authorIds",
           "publisherId",
           "title"
@@ -759,10 +964,6 @@
             "maxLength": 200,
             "minLength": 0,
             "type": "string"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int32"
           },
           "publicationYear": {
             "maximum": 2100,

@@ -1,13 +1,16 @@
-﻿using BookStoreApi.Models.DTOs;
+﻿using BookStoreApi.Extra;
+using BookStoreApi.Models.DTOs;
+using BookStoreApi.Entities;
 
 namespace BookStoreApi.Services
 {
     public interface IBookService
     {
-        Task<IEnumerable<BookDto>> GetAllBooksAsync();
-        Task<BookDto?> GetBookByIdAsync(int id);
-        Task<BookDto> CreateBookAsync(CreateBookDto createDto);
-        Task<bool> UpdateBookAsync(int id, UpdateBookDto updateDto);
-        Task<bool> DeleteBookAsync(int id);
+        Task<IEnumerable<Book>> GetAllBooksAsync(QueryObject query);
+        Task<Book?> GetBookByIdAsync(int id);
+        Task<Book> CreateBookAsync(Book book);
+        Task<bool> UpdateBookAsync(Book book);
+        Task<bool> DeleteBookAsync(Book book);
+        Task SaveChangesAsync();
     }
 }

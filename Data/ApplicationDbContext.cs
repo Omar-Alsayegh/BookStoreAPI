@@ -1,15 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using BookStoreApi.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using BookStoreApi.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Text;
 
 namespace BookStoreApi.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
         public DbSet<Book> Books { get; set; }
-        public DbSet<Author>Authors { get; set; }
+        public DbSet<Author> Authors { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<BookAuthor> BookAuthors { get; set; }
 
@@ -25,7 +29,7 @@ namespace BookStoreApi.Data
             modelBuilder.Entity<BookAuthor>()
                 .HasOne(ba => ba.Book) // BookAuthor has one Book
                 .WithMany(b => b.BookAuthors) // Book has many BookAuthors
-                .HasForeignKey(ba => ba.BookId); // Foreign key to Book
+                .HasForeignKey(ba => ba.BookId).IsRequired().OnDelete(DeleteBehavior.Restrict); // Foreign key to Book
 
             modelBuilder.Entity<BookAuthor>()
                 .HasOne(ba => ba.Author) // BookAuthor has one Author
@@ -40,7 +44,24 @@ namespace BookStoreApi.Data
                 .OnDelete(DeleteBehavior.Restrict); // Optional: Prevent deleting publisher if books exist
                                                     // Use .OnDelete(DeleteBehavior.Cascade) for automatic deletion of books.
                                                     // Let's stick with Restrict for now, it's safer.
-        }
 
+            List<IdentityRole> roles = new List<IdentityRole>
+            {
+                new IdentityRole
+                {
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                },
+                new IdentityRole
+                 {
+                    Name = "User",
+                    NormalizedName = "USER"
+                },
+
+
+            };
+            modelBuilder.Entity<IdentityRole>().HasData(roles);
+
+        }
     }
 }

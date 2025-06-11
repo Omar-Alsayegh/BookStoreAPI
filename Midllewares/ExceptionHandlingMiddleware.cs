@@ -56,7 +56,7 @@
 //    }
 
 //    // Extension method to easily add the middleware in Program.cs
-//    public static class ExceptionHandlingMiddlewareExtensions
+//    //public static class ExceptionHandlingMiddlewareExtensions
 //    {
 //        public static IApplicationBuilder UseCustomExceptionHandling(this IApplicationBuilder builder)
 //        {

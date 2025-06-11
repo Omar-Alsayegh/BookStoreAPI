@@ -1,15 +1,62 @@
 [
   {
-    "ContainingType": "BookStoreApi.Controllers.AuthorsController",
+    "ContainingType": "BookStoreApi.Controllers.AccountController",
+    "Method": "Result",
+    "RelativePath": "api/account/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "registerDto",
+        "Type": "BookStoreApi.Models.DTOs.RegisterDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BookStoreApi.Controllers.AuthorController",
     "Method": "GetAllAuthors",
-    "RelativePath": "api/Authors",
+    "RelativePath": "api/Author",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Birthdate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "SortBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsDescending",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IAsyncEnumerable\u00601[[BookStoreApi.Models.DTOs.AuthorDto, BookStoreApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BookStoreApi.Models.DTOs.AuthorDto, BookStoreApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -20,9 +67,9 @@
     ]
   },
   {
-    "ContainingType": "BookStoreApi.Controllers.AuthorsController",
+    "ContainingType": "BookStoreApi.Controllers.AuthorController",
     "Method": "PostAuthor",
-    "RelativePath": "api/Authors",
+    "RelativePath": "api/Author",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -46,9 +93,9 @@
     ]
   },
   {
-    "ContainingType": "BookStoreApi.Controllers.AuthorsController",
+    "ContainingType": "BookStoreApi.Controllers.AuthorController",
     "Method": "GetAuthorById",
-    "RelativePath": "api/Authors/{id}",
+    "RelativePath": "api/Author/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -72,9 +119,9 @@
     ]
   },
   {
-    "ContainingType": "BookStoreApi.Controllers.AuthorsController",
+    "ContainingType": "BookStoreApi.Controllers.AuthorController",
     "Method": "UpdateAuthor",
-    "RelativePath": "api/Authors/{id}",
+    "RelativePath": "api/Author/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -93,9 +140,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "BookStoreApi.Controllers.AuthorsController",
+    "ContainingType": "BookStoreApi.Controllers.AuthorController",
     "Method": "DeleteAuthor",
-    "RelativePath": "api/Authors/{id}",
+    "RelativePath": "api/Author/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -115,7 +162,43 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "Title",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AuthorName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "PublisherName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SortBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsDescending",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.IEnumerable\u00601[[BookStoreApi.Models.DTOs.BookDto, BookStoreApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
@@ -228,13 +311,49 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "BookStoreApi.Controllers.LoggingTestController",
+    "Method": "Get",
+    "RelativePath": "api/LoggingTest",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "BookStoreApi.Controllers.PublishersController",
     "Method": "GetAllPublishers",
     "RelativePath": "api/Publishers",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SortBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsDescending",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.IEnumerable\u00601[[BookStoreApi.Models.DTOs.PublisherDto, BookStoreApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",

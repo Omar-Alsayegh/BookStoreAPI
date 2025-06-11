@@ -72,6 +72,10 @@
               "target": "Package",
               "version": "[9.0.5, )"
             },
+            "Microsoft.Extensions.Identity.Core": {
+              "target": "Package",
+              "version": "[8.0.16, )"
+            },
             "NLog.Extensions.Logging": {
               "target": "Package",
               "version": "[5.5.0, )"
@@ -83,6 +87,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.Linq.Dynamic.Core": {
+              "target": "Package",
+              "version": "[1.6.5, )"
             }
           },
           "imports": [

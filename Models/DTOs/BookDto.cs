@@ -6,10 +6,9 @@ namespace BookStoreApi.Models.DTOs
     {
         public int Id { get; set; } 
         public string Title { get; set; } = string.Empty;
-        // public int AuthorId { get; set; }//Note: check this later I think I should remove it 
         public int PublicationYear { get; set; }
         public decimal Price { get; set; }
-        public string Content { get; set; }
+        public string Content { get; set; }=string.Empty;
 
         public List<AuthorDto> Authors { get; set; } = new List<AuthorDto>();
         public PublisherDto Publisher { get; set; } = null!;

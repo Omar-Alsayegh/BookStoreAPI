@@ -1,4 +1,6 @@
-﻿using BookStoreApi.Models.DTOs;
+﻿using BookStoreApi.Extra;
+using BookStoreApi.Mappings;
+using BookStoreApi.Models.DTOs;
 using BookStoreApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +18,11 @@ namespace BookStoreApi.Controllers
             _publisherService = publisherService;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PublisherDto>>> GetAllPublishers()
+        public async Task<ActionResult<IEnumerable<PublisherDto>>> GetAllPublishers([FromQuery] PublisherQueryObject query)
         {
-            var publishers = await _publisherService.GetAllPublishersAsync();
-            return Ok(publishers);
+            var publishers = await _publisherService.GetAllPublishersAsync(query);
+            var publishersDto = publishers.Select(p => p.ToDto()).ToList();
+            return Ok(publishersDto);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<PublisherDto>> GetPublisherById(int id)
@@ -29,36 +32,43 @@ namespace BookStoreApi.Controllers
             {
                 return NotFound();
             }
+            var publisherDto = publisher.ToDto();
             return Ok(publisher);
         }
         [HttpPost]
         public async Task<ActionResult<PublisherDto>> CreatePublisher([FromBody] CreatePublisherDto createDto)
         {
-
-            var newPublisher = await _publisherService.CreatePublisherAsync(createDto);
-            return CreatedAtAction(nameof(GetPublisherById), new { id = newPublisher.Id }, newPublisher);
+            var newPublisherEntity = createDto.ToEntity();
+            await _publisherService.CreatePublisherAsync(newPublisherEntity);
+            await _publisherService.SaveChangesAsync();
+            var createdPublisherDto = newPublisherEntity.ToDto();
+            return CreatedAtAction(nameof(GetPublisherById), new { id = newPublisherEntity.Id }, newPublisherEntity);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePublisher(int id, [FromBody] UpdatePublisherDto updateDto)
         {
-
-            var isUpdated = await _publisherService.UpdatePublisherAsync(id, updateDto);
-            if (!isUpdated)
+            var existingPublisherEntity = await _publisherService.GetPublisherByIdAsync(id);
+            if (existingPublisherEntity == null)
             {
                 return NotFound();
             }
+            existingPublisherEntity.UpdateFromDto(updateDto);
+            await _publisherService.UpdatePublisherAsync(existingPublisherEntity);
+            await _publisherService.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePublisher(int id)
+        public async Task<IActionResult> DeletePublisher([FromRoute] int id)
         {
-            var isDeleted = await _publisherService.DeletePublisherAsync(id);
-            if (!isDeleted)
+            var publisherToDeleteEntity = await _publisherService.GetPublisherByIdAsync(id);
+            if (publisherToDeleteEntity == null)
             {
                 return NotFound();
             }
+            await _publisherService.DeletePublisherAsync(publisherToDeleteEntity);
+            await _publisherService.SaveChangesAsync();
             return NoContent();
         }
 

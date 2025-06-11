@@ -1,7 +1,8 @@
-﻿using BookStoreApi.Models.DTOs;
-using BookStoreApi.Repositories;
+﻿using BookStoreApi.Entities;
+using BookStoreApi.Extra;
 using BookStoreApi.Mappings;
-using BookStoreApi.Extensions;
+using BookStoreApi.Models.DTOs;
+using BookStoreApi.Repositories;
 
 namespace BookStoreApi.Services
 {
@@ -15,51 +16,36 @@ namespace BookStoreApi.Services
             _publisherRepository = publisherRepository;
         }
 
-        public async Task<PublisherDto> CreatePublisherAsync(CreatePublisherDto createDto)
+        public async Task<Publisher> CreatePublisherAsync(Publisher newpublisher)
         {
-            var newPublisher = createDto.ToEntity();
-            await _publisherRepository.AddAsync(newPublisher);
-            await _publisherRepository.SaveChangesAsync();
-            return newPublisher.ToDto();
+            return await _publisherRepository.AddAsync(newpublisher);
         }
 
-        public async Task<bool> DeletePublisherAsync(int id)
+        public async Task<bool> DeletePublisherAsync(Publisher publisher)
         {
-            var booktoDelete = _publisherRepository.GetByIdAsync(id);
-            if (booktoDelete != null)
-            {
-                return false;
-            }
-            await _publisherRepository.DeleteAsync(id);
-            await _publisherRepository.SaveChangesAsync();
+            await _publisherRepository.DeleteAsync(publisher);
             return true;
 
         }
 
-        public async Task<IEnumerable<PublisherDto>> GetAllPublishersAsync()
+        public async Task<IEnumerable<Publisher>> GetAllPublishersAsync(PublisherQueryObject query)
         {
-            var Publishers = await _publisherRepository.GetAllAsync();
-            return Publishers.Select(x => x.ToDto()).ToList();
+            return await _publisherRepository.GetAllPublishersAsync(query);
         }
 
-        public async Task<PublisherDto?> GetPublisherByIdAsync(int id)
+        public async Task<Publisher?> GetPublisherByIdAsync(int id)
         {
-            var publisher = await _publisherRepository.GetByIdAsync(id);
-            return publisher?.ToDto();
+            return await _publisherRepository.GetByIdAsync(id);
         }
 
-        public async Task<bool> UpdatePublisherAsync(int id, UpdatePublisherDto updateDto)
+        public async Task<bool> UpdatePublisherAsync(Publisher publisher)
         {
-            var updatedPublisher = await _publisherRepository.GetByIdAsync(id);
-            if (updatedPublisher != null)
-            {
-                return false;
-            }
-            updatedPublisher.UpdateFromDto(updateDto);
-            await _publisherRepository.UpdateAsync(updatedPublisher);
-            await _publisherRepository.SaveChangesAsync();
+            await _publisherRepository.UpdateAsync(publisher);
             return true;
-
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _publisherRepository.SaveChangesAsync();
         }
     }
 }

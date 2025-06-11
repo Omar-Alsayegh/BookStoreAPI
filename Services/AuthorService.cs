@@ -5,6 +5,7 @@ using BookStoreApi.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BookStoreApi.Extra;
 
 
 namespace BookStoreApi.Services
@@ -17,49 +18,56 @@ namespace BookStoreApi.Services
         {
             _authorRepository = authorRepository;
         }
-        public async Task<AuthorDto> CreateAuthorAsync(CreateAuthorDto createDto)
+        public async Task<Author> CreateAuthorAsync(Author newauthor)
         {
-            var newauthor = createDto.CreateToEntity();
-            await _authorRepository.AddAsync(newauthor);
-            await _authorRepository.SaveChangesAsync();
-            return newauthor.ToDto();
+            //var newauthor = createDto.CreateToEntity();
+           return  await _authorRepository.AddAsync(newauthor);
+          //  await _authorRepository.SaveChangesAsync();// hay lzm 7ota bl controller
+            //return newauthor.ToDto();
         }
 
-        public async Task<bool> DeleteAuthorAsync(int id)
+        public async Task<bool> DeleteAuthorAsync(Author authortoDelete)
         {
-            var authortobedel = await _authorRepository.GetByIdAsync(id);
-            if (authortobedel == null)
-            {
-                return false;
-            }
-            await _authorRepository.DeleteAsync(id);
-            await _authorRepository.SaveChangesAsync();
+            //var authortobedel = await _authorRepository.GetByIdAsync(id);
+            //if (authortobedel == null)
+            //{
+            //    return false;
+            //}
+            await _authorRepository.DeleteAsync(authortoDelete);
+            //await _authorRepository.SaveChangesAsync();
             return true;
         }
 
-        public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync()
+        //public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync()
+        //{
+        //    var authors = await _authorRepository.GetAllAsync();
+        //    return authors.Select(a => a.ToDto()).ToList();
+        //}
+        public async Task<IEnumerable<Author>> GetAllAuthorsAsync(AuthorQueryObject query)
         {
-            var authors = await _authorRepository.GetAllAsync();
-            return authors.Select(a => a.ToDto()).ToList();
+           return await _authorRepository.GetAllAuthorsAsync(query);
         }
 
-        public async Task<AuthorDto?> GetAuthorByIdAsync(int id)
+        public async Task<Author?> GetAuthorByIdAsync(int id)
         {
-            var author = await _authorRepository.GetByIdAsync(id);
-            return author?.ToDto();
+            return await _authorRepository.GetByIdAsync(id);
         }
 
-        public async Task<bool> UpdateAuthorAsync(int id, UpdateAuthorDto updateDto)
+        public async Task<bool> UpdateAuthorAsync(Author existingAuthor)
         {
-            var existingAuthor = await _authorRepository.GetByIdAsync(id);
-            if (existingAuthor == null)
-            {
-                return false;
-            }
-            existingAuthor.UpdateFromDto(updateDto);
+           // var existingAuthor = await _authorRepository.GetByIdAsync(id);
+            //if (existingAuthor == null)
+            //{
+            //    return false;
+            //}
+            //existingAuthor.UpdateFromDto(updateDto);
             await _authorRepository.UpdateAsync(existingAuthor);
-            await _authorRepository.SaveChangesAsync();
+           // await _authorRepository.SaveChangesAsync();
             return true;
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _authorRepository.SaveChangesAsync();
         }
     }
 }

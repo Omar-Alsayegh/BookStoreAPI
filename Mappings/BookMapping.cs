@@ -3,7 +3,7 @@ using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace BookStoreApi.Extensions
+namespace BookStoreApi.Mappings
 {
     public static class BookMapping
     {

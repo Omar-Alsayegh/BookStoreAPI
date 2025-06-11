@@ -16,19 +16,20 @@ namespace BookStoreApi.Repositories
             _dbSet = context.Set<TEntity>();
         }
 
-        public async Task AddAsync(TEntity entity)
+        public async Task<TEntity> AddAsync(TEntity entity)
         {
-            await _dbSet.AddAsync(entity);
+           var entry= await _dbSet.AddAsync(entity);
+            return entry.Entity;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(TEntity entity)
         {
-            var entityToDelete = await _dbSet.FindAsync(id);
-            if (entityToDelete != null)
-            {
+            //var entityToDelete = await _dbSet.FindAsync(id);
+            //if (entityToDelete != null)
+            //{
 
-                _dbSet.Remove(entityToDelete);
-            }
+             _dbSet.Remove(entity);
+            //}
         }
 
         public async Task<bool> ExistsAsync(int id)
@@ -57,14 +58,15 @@ namespace BookStoreApi.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public virtual Task UpdateAsync(TEntity entity)
+        public virtual Task<TEntity> UpdateAsync(TEntity entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
             _context.Entry(entity).State = EntityState.Modified;
-            return Task.CompletedTask;
+           // return Task.CompletedTask;
+            return Task.FromResult(entity);
         }
     }
 }

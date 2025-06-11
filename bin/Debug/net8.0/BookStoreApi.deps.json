@@ -13,9 +13,11 @@
           "Microsoft.AspNetCore.OpenApi": "8.0.16",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.5",
           "Microsoft.EntityFrameworkCore.Tools": "9.0.5",
+          "Microsoft.Extensions.Identity.Core": "8.0.16",
           "NLog.Extensions.Logging": "5.5.0",
           "NLog.Web.AspNetCore": "5.5.0",
-          "Swashbuckle.AspNetCore": "6.6.2"
+          "Swashbuckle.AspNetCore": "6.6.2",
+          "System.Linq.Dynamic.Core": "1.6.5"
         },
         "runtime": {
           "BookStoreApi.dll": {}
@@ -1052,6 +1054,14 @@
           }
         }
       },
+      "System.Linq.Dynamic.Core/1.6.5": {
+        "runtime": {
+          "lib/net8.0/System.Linq.Dynamic.Core.dll": {
+            "assemblyVersion": "1.6.5.0",
+            "fileVersion": "1.6.5.0"
+          }
+        }
+      },
       "System.Memory/4.5.4": {},
       "System.Memory.Data/1.0.2": {
         "dependencies": {
@@ -1698,6 +1708,13 @@
       "sha512": "sha512-5WXo+3MGcnYn54+1ojf+kRzKq1Q6sDUnovujNJ2ky1nl1/kP3+PMil9LPbFvZ2mkhvAGmQcY07G2sfHat/v0Fw==",
       "path": "system.io.pipelines/9.0.5",
       "hashPath": "system.io.pipelines.9.0.5.nupkg.sha512"
+    },
+    "System.Linq.Dynamic.Core/1.6.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NCldHajaCst63aFWXgkrRZOqt21LEDyQ/C0yKAlyuLRunbEaoxxrEm0qII0B6FXU7BE2qZjPRw2Dt5841VNE7w==",
+      "path": "system.linq.dynamic.core/1.6.5",
+      "hashPath": "system.linq.dynamic.core.1.6.5.nupkg.sha512"
     },
     "System.Memory/4.5.4": {
       "type": "package",

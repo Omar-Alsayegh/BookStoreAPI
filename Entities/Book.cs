@@ -2,6 +2,11 @@
 {
     public class Book
     {
+        public Book() //always do all these lists like this 
+        {
+            BookAuthors = new HashSet<BookAuthor>();
+        }
+
         public int Id { get; set; }
         public string Title { get; set; }=string.Empty;
         //public string Author { get; set; }
@@ -15,7 +20,7 @@
         public Publisher Publisher { get; set; } = null!;
         // **
         //Many to many relationship **
-        public ICollection<BookAuthor> BookAuthors { get; set; } = new List<BookAuthor>();
+        public ICollection<BookAuthor> BookAuthors { get; set; } 
         // 8*
 }
 }

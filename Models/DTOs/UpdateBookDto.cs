@@ -8,8 +8,8 @@ namespace BookStoreApi.Models.DTOs
         [StringLength(200)]
         public string Title { get; set; } = string.Empty;
 
-        [Required]
-        public int AuthorId { get; set; }
+        //[Required]
+        //public int AuthorId { get; set; }
 
         [Range(1000, 2100)]
         public int PublicationYear { get; set; }
@@ -18,7 +18,7 @@ namespace BookStoreApi.Models.DTOs
         public decimal Price { get; set; }
 
         [StringLength(10000000, MinimumLength = 0)]
-        public string Content { get; set; }
+        public string? Content { get; set; }
 
         [Required]
         public int PublisherId { get; set; }

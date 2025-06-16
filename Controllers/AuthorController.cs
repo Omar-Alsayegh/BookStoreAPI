@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using BookStoreApi.Entities;
 using BookStoreApi.Repositories;
 using BookStoreApi.Extra;
+using BookStoreApi.Models.DTOs.Response;
 
 namespace BookStoreApi.Controllers
 {

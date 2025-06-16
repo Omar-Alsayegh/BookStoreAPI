@@ -3,6 +3,7 @@ using BookStoreApi.Infrastructure;
 using BookStoreApi.Models;
 using BookStoreApi.Repositories;
 using BookStoreApi.Services;
+using BookStoreApi.Services.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -57,7 +58,8 @@ try
         options.Password.RequireLowercase = true;
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequiredLength = 8;
-    }).AddEntityFrameworkStores<ApplicationDbContext>();
+    }).AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
     builder.Services.AddAuthentication(options =>
     {
@@ -88,7 +90,57 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
+    builder.Services.AddScoped<ITokenService, Tokenservice>();
+
+    builder.Services.AddTransient<IEmailService , SmtpEmailService>();
     var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var serviceProvider = scope.ServiceProvider;
+        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var loggerForSeeding = serviceProvider.GetRequiredService<ILogger<Program>>(); // Get logger for this scope
+
+        // Seed roles (ensure these exist)
+        string[] roleNames = { "Admin", "User" };
+        foreach (var roleName in roleNames)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+                loggerForSeeding.LogInformation("Role '{RoleName}' created successfully at startup.", roleName);
+            }
+        }
+
+        // Seed an Admin user (optional, but highly recommended for initial setup)
+        var adminUser = await userManager.FindByEmailAsync("admin@example.com");
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = "admin@example.com",
+                Email = "admin@example.com",
+                FirstName = "Super", // Only if you added to ApplicationUser
+                LastName = "Admin",  // Only if you added to ApplicationUser
+                DateJoined = DateTime.UtcNow // Only if you added to ApplicationUser
+            };
+            var createAdminResult = await userManager.CreateAsync(adminUser, "Admin@123"); // <-- CHANGE THIS PASSWORD IN PRODUCTION!
+            if (createAdminResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+                await userManager.AddToRoleAsync(adminUser, "User");
+                loggerForSeeding.LogInformation("Admin user 'admin@example.com' created and assigned roles at startup.");
+            }
+            else
+            {
+                foreach (var error in createAdminResult.Errors)
+                {
+                    loggerForSeeding.LogError("Failed to create admin user at startup: {Description}", error.Description);
+                }
+            }
+        }
+    }
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

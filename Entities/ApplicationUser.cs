@@ -7,6 +7,8 @@ namespace BookStoreApi.Models
 
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-        public DateTime DateJoined { get; set; } = DateTime.UtcNow;
+        public DateTime? DateJoined { get; set; }
+
+        public DateTime? LastPasswordResetRequestUtc { get; set; }
     }
 }

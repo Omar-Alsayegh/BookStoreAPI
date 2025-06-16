@@ -4,6 +4,7 @@ using BookStoreApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615094527_AddLastPasswordResetRequestToUser")]
+    partial class AddLastPasswordResetRequestToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,7 +42,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors", (string)null);
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Book", b =>
@@ -72,7 +75,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.BookAuthor", b =>
@@ -87,7 +90,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("BookAuthors", (string)null);
+                    b.ToTable("BookAuthors");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Publisher", b =>
@@ -104,7 +107,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Publishers", (string)null);
+                    b.ToTable("Publishers");
                 });
 
             modelBuilder.Entity("BookStoreApi.Models.ApplicationUser", b =>

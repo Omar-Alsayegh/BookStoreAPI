@@ -45,22 +45,6 @@ namespace BookStoreApi.Data
                                                     // Use .OnDelete(DeleteBehavior.Cascade) for automatic deletion of books.
                                                     // Let's stick with Restrict for now, it's safer.
 
-            List<IdentityRole> roles = new List<IdentityRole>
-            {
-                new IdentityRole
-                {
-                    Name = "Admin",
-                    NormalizedName = "ADMIN"
-                },
-                new IdentityRole
-                 {
-                    Name = "User",
-                    NormalizedName = "USER"
-                },
-
-
-            };
-            modelBuilder.Entity<IdentityRole>().HasData(roles);
 
         }
     }

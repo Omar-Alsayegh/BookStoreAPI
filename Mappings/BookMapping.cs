@@ -1,6 +1,7 @@
 ﻿using BookStoreApi.Entities;
 using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
+using BookStoreApi.Models.DTOs.Response;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BookStoreApi.Mappings

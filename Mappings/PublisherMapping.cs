@@ -1,5 +1,6 @@
 ﻿using BookStoreApi.Entities;
 using BookStoreApi.Models.DTOs;
+using BookStoreApi.Models.DTOs.Response;
 
 namespace BookStoreApi.Mappings
 {

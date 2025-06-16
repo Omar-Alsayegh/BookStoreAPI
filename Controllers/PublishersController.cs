@@ -1,7 +1,9 @@
 ﻿using BookStoreApi.Extra;
 using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
+using BookStoreApi.Models.DTOs.Response;
 using BookStoreApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +20,7 @@ namespace BookStoreApi.Controllers
             _publisherService = publisherService;
         }
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<PublisherDto>>> GetAllPublishers([FromQuery] PublisherQueryObject query)
         {
             var publishers = await _publisherService.GetAllPublishersAsync(query);

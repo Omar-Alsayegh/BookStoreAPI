@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BookStoreApi.Models.DTOs
+namespace BookStoreApi.Models.DTOs.Response
 {
-    public class CreateAuthorDto
+    public class UpdatePublisherDto
     {
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-        public DateTime Birthdate { get; set; }
     }
 }

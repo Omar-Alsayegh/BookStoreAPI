@@ -4,6 +4,7 @@ using BookStoreApi.Entities;
 using BookStoreApi.Extra;
 using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
+using BookStoreApi.Models.DTOs.Response;
 using BookStoreApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using static System.Reflection.Metadata.BlobBuilder;

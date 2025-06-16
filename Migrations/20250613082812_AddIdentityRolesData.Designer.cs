@@ -4,6 +4,7 @@ using BookStoreApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613082812_AddIdentityRolesData")]
+    partial class AddIdentityRolesData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,7 +42,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors", (string)null);
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Book", b =>
@@ -72,7 +75,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.BookAuthor", b =>
@@ -87,7 +90,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("BookAuthors", (string)null);
+                    b.ToTable("BookAuthors");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Publisher", b =>
@@ -104,7 +107,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Publishers", (string)null);
+                    b.ToTable("Publishers");
                 });
 
             modelBuilder.Entity("BookStoreApi.Models.ApplicationUser", b =>
@@ -119,7 +122,7 @@ namespace BookStoreApi.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DateJoined")
+                    b.Property<DateTime>("DateJoined")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -134,9 +137,6 @@ namespace BookStoreApi.Migrations
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("LastPasswordResetRequestUtc")
-                        .HasColumnType("datetime2");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -209,6 +209,20 @@ namespace BookStoreApi.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "b576cee5-f09c-46e2-ad92-a2d7390e215d",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "8c897b0d-ac1f-4295-ab8a-7e80c177c48f",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

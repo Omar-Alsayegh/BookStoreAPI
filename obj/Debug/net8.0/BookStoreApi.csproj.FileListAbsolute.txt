@@ -9,6 +9,9 @@ C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\BookStoreApi.pdb
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\FluentValidation.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
+C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Humanizer.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\SmartPc\Desktop\Project\dotnet_training\Train\BookstoreAPI\BookStoreApi\BookStoreApi\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll

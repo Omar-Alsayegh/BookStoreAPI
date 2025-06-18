@@ -1,8 +1,11 @@
-﻿using BookStoreApi.Controllers;
+﻿using Azure.Core;
+using BookStoreApi.Controllers;
 using BookStoreApi.Models;
 using BookStoreApi.Models.DTOs.Auth;
+using BookStoreApi.Models.DTOs.Response;
 using BookStoreApi.Services;
 using BookStoreApi.Services.Email;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
@@ -71,7 +74,7 @@ namespace BookStoreApi.Controllers
 
         //}
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -85,7 +88,7 @@ namespace BookStoreApi.Controllers
                 return BadRequest(ModelState);
             }
             var userExists = await _userManager.FindByEmailAsync(request.EmailAddress);
-            if (userExists != null)
+            if (userExists != null && userExists.NormalizedEmail==request.EmailAddress.Normalize())
             {
                 _logger.LogWarning("Register attempt for {Email} failed: User already exists.", request.EmailAddress);
                 return BadRequest("User with this email already exists.");
@@ -102,10 +105,10 @@ namespace BookStoreApi.Controllers
             var result = await _userManager.CreateAsync(newUser, request.Password);
             if (result.Succeeded)
             {
-                // Assign "User" role by default 
-                if (!await _userManager.IsInRoleAsync(newUser, "User"))
+                if (!await _userManager.IsInRoleAsync(newUser, "Customer")) 
                 {
-                    await _userManager.AddToRoleAsync(newUser, "User");
+                    await _userManager.AddToRoleAsync(newUser, "Customer");
+                    _logger.LogInformation("User {Email} assigned 'Customer' role.", request.EmailAddress);
                 }
                 _logger.LogInformation("User {Email} registered successfully.", request.EmailAddress);
                 return Ok("User registered successfully.");
@@ -157,7 +160,7 @@ namespace BookStoreApi.Controllers
                 Roles = roles.ToList()
             });
         }
-        [HttpPost("forgot-password")]
+        [HttpPost("ForgetPassword")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
         {
             if (!ModelState.IsValid)
@@ -218,7 +221,7 @@ namespace BookStoreApi.Controllers
             }
             return Ok(new { Message = "If an account exists for this email, a password reset link has been sent." });
         }
-        [HttpPost("reset-password")]
+        [HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
         {
             if (!ModelState.IsValid)
@@ -238,6 +241,173 @@ namespace BookStoreApi.Controllers
             }
             var errors = result.Errors.Select(e => e.Description).ToList();
             return BadRequest(new { Message = "Password reset failed.", Errors = errors });
+        }
+
+        [HttpPost("admin/assign-role")]
+        [Authorize(Roles = "Admin")] // Only users with the "Admin" role can access this
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // User not found
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] // Access denied due to roles
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AssignRole([FromBody] ManageUserRoleRequestDto request)
+        {
+            // Log who is attempting the action (optional, but good for auditing)
+            var currentAdminEmail = User.Identity?.Name;
+            _logger.LogInformation("Admin '{AdminEmail}' attempting to assign role '{RoleName}' to user '{UserIdentifier}'.",
+                                    currentAdminEmail, request.RoleName, request.UserIdentifier);
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Assign role attempt for user '{UserIdentifier}' failed due to invalid model state.", request.UserIdentifier);
+                return BadRequest(ModelState);
+            }
+
+            // Find the user by email or username
+            // We try ByEmail first, then ByName as UserName is often set to Email.
+            var user = await _userManager.FindByEmailAsync(request.UserIdentifier) ?? await _userManager.FindByNameAsync(request.UserIdentifier);
+            if (user == null)
+            {
+                _logger.LogWarning("Assign role attempt for user '{UserIdentifier}' failed: User not found.", request.UserIdentifier);
+                return NotFound("User not found.");
+            }
+
+            // --- Role Name Validation ---
+            // Ensure the role name being assigned is one of your predefined roles.
+            // An Admin should be able to assign Admin, Employee, or Customer roles.
+            string[] allowedRoles = { "Admin", "Employee", "Customer" };
+            if (!Array.Exists(allowedRoles, role => role.Equals(request.RoleName, StringComparison.OrdinalIgnoreCase)))
+            {
+                ModelState.AddModelError(nameof(request.RoleName), $"Invalid role name. Allowed roles are: {string.Join(", ", allowedRoles)}.");
+                _logger.LogWarning("Admin '{AdminEmail}' failed to assign role: Invalid role name '{RoleName}'.", currentAdminEmail, request.RoleName);
+                return BadRequest(ModelState);
+            }
+
+            // --- Prevent assigning role if user already has it ---
+            if (await _userManager.IsInRoleAsync(user, request.RoleName))
+            {
+                _logger.LogInformation("User '{UserIdentifier}' already has role '{RoleName}'. No change needed.", request.UserIdentifier, request.RoleName);
+                return Ok($"User '{request.UserIdentifier}' already has role '{request.RoleName}'.");
+            }
+
+            // --- Add the role to the user ---
+            var result = await _userManager.AddToRoleAsync(user, request.RoleName);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User '{UserIdentifier}' successfully assigned role '{RoleName}' by Admin '{AdminEmail}'.",
+                                        request.UserIdentifier, request.RoleName, currentAdminEmail);
+                return Ok($"Role '{request.RoleName}' assigned to user '{request.UserIdentifier}' successfully.");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                _logger.LogError("Error assigning role '{RoleName}' to user '{UserIdentifier}': {Code} - {Description}",
+                                 request.RoleName, request.UserIdentifier, error.Code, error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("admin/remove-role")] // Using POST for state change, could also be DELETE if body is allowed
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // User not found
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] // Not an Admin
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RemoveRole([FromBody] ManageUserRoleRequestDto request) // Reusing the DTO
+        {
+            var currentAdminEmail = User.Identity?.Name;
+            _logger.LogInformation("Admin '{AdminEmail}' attempting to remove role '{RoleName}' from user '{UserIdentifier}'.",
+                                    currentAdminEmail, request.RoleName, request.UserIdentifier);
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Remove role attempt for user '{UserIdentifier}' failed due to invalid model state.", request.UserIdentifier);
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByEmailAsync(request.UserIdentifier) ?? await _userManager.FindByNameAsync(request.UserIdentifier);
+            if (user == null)
+            {
+                _logger.LogWarning("Remove role attempt for user '{UserIdentifier}' failed: User not found.", request.UserIdentifier);
+                return NotFound("User not found.");
+            }
+
+            // --- Role Name Validation ---
+            string[] allowedRoles = { "Admin", "Employee", "Customer" };
+            if (!Array.Exists(allowedRoles, role => role.Equals(request.RoleName, StringComparison.OrdinalIgnoreCase)))
+            {
+                ModelState.AddModelError(nameof(request.RoleName), $"Invalid role name. Allowed roles are: {string.Join(", ", allowedRoles)}.");
+                _logger.LogWarning("Admin '{AdminEmail}' failed to remove role: Invalid role name '{RoleName}'.", currentAdminEmail, request.RoleName);
+                return BadRequest(ModelState);
+            }
+
+            // --- Prevent removing role if user doesn't have it ---
+            if (!await _userManager.IsInRoleAsync(user, request.RoleName))
+            {
+                _logger.LogInformation("User '{UserIdentifier}' does not have role '{RoleName}'. No change needed.", request.UserIdentifier, request.RoleName);
+                return Ok($"User '{request.UserIdentifier}' does not have role '{request.RoleName}'.");
+            }
+
+            // --- Remove the role from the user ---
+            var result = await _userManager.RemoveFromRoleAsync(user, request.RoleName);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Role '{RoleName}' successfully removed from user '{UserIdentifier}' by Admin '{AdminEmail}'.",
+                                        request.RoleName, request.UserIdentifier, currentAdminEmail);
+                return Ok($"Role '{request.RoleName}' removed from user '{request.UserIdentifier}' successfully.");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                _logger.LogError("Error removing role '{RoleName}' from user '{UserIdentifier}': {Code} - {Description}",
+                                 request.RoleName, request.UserIdentifier, error.Code, error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return BadRequest(ModelState);
+        }
+        [HttpPost("CreateUser")]
+        [Authorize (Roles ="Admin")]
+        public async Task<IActionResult> CreateUser(RegisterDto registerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Register attempt for {Email} failed due to invalid model state.", registerDto.EmailAddress);
+                return BadRequest(ModelState);
+            }
+            var checkUser = await _userManager.FindByEmailAsync(registerDto.EmailAddress);
+            if (checkUser != null)
+            {
+                _logger.LogWarning("Register attempt failed the user is already found in the database");
+                return BadRequest("User already registered");
+            }
+
+            var user = new ApplicationUser
+            {
+                Email = registerDto.EmailAddress,
+                UserName= registerDto.EmailAddress,
+                FirstName = registerDto?.FirstName,
+                LastName = registerDto?.LastName,
+                DateJoined= DateTime.UtcNow
+            };
+            var result = await _userManager.CreateAsync(user, registerDto.Password);
+            if (result.Succeeded)
+            {
+                if (!await _userManager.IsInRoleAsync(user, "Customer"))
+                {
+                    await _userManager.AddToRoleAsync(user, "Customer");
+                    _logger.LogInformation("User {Email} assigned 'Customer' role.", registerDto.EmailAddress);
+                }
+                _logger.LogInformation("User {Email} registered successfully.", registerDto.EmailAddress);
+                return Ok("User registered successfully.");
+            }
+            foreach (var error in result.Errors)
+            {
+                _logger.LogError("Error registering user {Email}: {Code} - {Description}", registerDto.EmailAddress, error.Code, error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return BadRequest(ModelState);
         }
     }
 }

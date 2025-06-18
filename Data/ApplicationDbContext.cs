@@ -16,6 +16,7 @@ namespace BookStoreApi.Data
         public DbSet<Author> Authors { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<BookAuthor> BookAuthors { get; set; }
+        public DbSet<Rental> Rentals { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +46,17 @@ namespace BookStoreApi.Data
                                                     // Use .OnDelete(DeleteBehavior.Cascade) for automatic deletion of books.
                                                     // Let's stick with Restrict for now, it's safer.
 
+            modelBuilder.Entity<Book>()
+                .HasMany(p => p.Rentals)
+                .WithOne(b => b.Book)
+                .HasForeignKey(b => b.BookId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(p => p.Rentals)
+                .WithOne(b => b.User)
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

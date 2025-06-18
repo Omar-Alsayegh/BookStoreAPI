@@ -81,5 +81,13 @@ namespace BookStoreApi.Repositories
 
             return await booksQuery.ToListAsync();
         }
+
+        public async Task<Book> GetBookWithAuthorsAsync(string bookTitle)
+        {
+            return await _context.Books
+           .Include(b => b.BookAuthors)
+               .ThenInclude(ba => ba.Author)
+           .FirstOrDefaultAsync(b => b.Title == bookTitle);
+        }
     }
 }

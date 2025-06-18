@@ -7,6 +7,7 @@ namespace BookStoreApi.Services
     public interface IBookService
     {
         Task<IEnumerable<Book>> GetAllBooksAsync(QueryObject query);
+        Task<Book> GetBookWithAuthorsAsync(string bookTitle);
         Task<Book?> GetBookByIdAsync(int id);
         Task<Book> CreateBookAsync(Book book);
         Task<bool> UpdateBookAsync(Book book);

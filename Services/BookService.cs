@@ -164,5 +164,10 @@ namespace BookStoreApi.Services
         {
             await _bookRepository.SaveChangesAsync();
         }
+
+        public async Task<Book>GetBookWithAuthorsAsync(string bookTitle)
+        {
+            return await _bookRepository.GetBookWithAuthorsAsync(bookTitle);
+        }
     }
 }

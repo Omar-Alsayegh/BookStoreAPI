@@ -6,7 +6,9 @@ using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
 using BookStoreApi.Models.DTOs.Response;
 using BookStoreApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static System.Reflection.Metadata.BlobBuilder;
 
 namespace BookStoreApi.Controllers
@@ -17,12 +19,14 @@ namespace BookStoreApi.Controllers
     {
         private readonly IBookService _bookService;
         private readonly IAuthorService _authorService;
-        public BooksController(IBookService bookService, IAuthorService authorService)
+        private readonly ILogger<BooksController> _logger;
+        public BooksController(IBookService bookService, IAuthorService authorService, ILogger<BooksController> logger)
         {
             _bookService = bookService;
             _authorService = authorService;
+            _logger = logger;
         }
-
+     
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks([FromQuery] QueryObject query)
         {
@@ -30,7 +34,7 @@ namespace BookStoreApi.Controllers
             var booksDto = Books.Select(b => b.ToBookDto()).ToList();
             return Ok(Books);
         }
-
+       // [Authorize (Roles ="Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<BookDto>> GetBook(int id)
         {
@@ -42,7 +46,7 @@ namespace BookStoreApi.Controllers
             var bookdto = book.ToBookDto();
             return Ok(book);
         }
-
+        [Authorize (Roles ="Admin,Employee")]
         [HttpPost]
         public async Task<ActionResult<BookDto>> PostBook([FromBody] CreateBookDto createBook)
         {
@@ -70,18 +74,24 @@ namespace BookStoreApi.Controllers
 
                 var createdBook = await _bookService.CreateBookAsync(newBook);
                 await _bookService.SaveChangesAsync();
-                var createdBookDto = createdBook.ToBookDto();
-                return CreatedAtAction(nameof(GetBook), new { id = newBook.Id }, newBook);
+                var loadedBook = await _bookService.GetBookWithAuthorsAsync(createBook.Title);
+                var createdBookDto = loadedBook.ToBookDto();
+                return CreatedAtAction(nameof(GetBook), new { id = createdBookDto.Id }, createdBookDto);
 
             }
-            catch (Exception )
+            catch (Exception e)
             {
-
-                return StatusCode(500, new { message = "An error occurred while creating the book." });
+                _logger.LogError("An Error occured", e.Message);
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred while processing your request.",
+                    exceptionMessage = e.Message
+                });
             }
 
 
             }
+        [Authorize(Roles ="Admin,Employee")]
         [HttpPut("{id}")]
         public async Task<ActionResult<BookDto>> PutBook(int id, UpdateBookDto updateBook)
         {
@@ -124,7 +134,7 @@ namespace BookStoreApi.Controllers
 
                 await _bookService.SaveChangesAsync();
 
-                return NoContent();
+                return Ok(existingBook);
             }
             catch (InvalidOperationException ) 
             {
@@ -137,6 +147,7 @@ namespace BookStoreApi.Controllers
             }
             
         }
+        [Authorize (Roles ="Admin,Employee")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {

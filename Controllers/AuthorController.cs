@@ -6,6 +6,7 @@ using BookStoreApi.Entities;
 using BookStoreApi.Repositories;
 using BookStoreApi.Extra;
 using BookStoreApi.Models.DTOs.Response;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookStoreApi.Controllers
 {
@@ -18,7 +19,7 @@ namespace BookStoreApi.Controllers
         {
             _authorService = authorService;
         }
-
+        [Authorize (Roles ="Admin,Employee")]
         [HttpGet]
         //public async Task<ActionResult<IAsyncEnumerable<AuthorDto>>> GetAllAuthors()
         //{
@@ -32,7 +33,7 @@ namespace BookStoreApi.Controllers
             var authorsDto = authors.Select(a => a.ToDto()).ToList();
             return Ok(authorsDto);
         }
-
+        [Authorize (Roles ="Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<AuthorDto>> GetAuthorById(int id)
         {
@@ -45,7 +46,7 @@ namespace BookStoreApi.Controllers
             var authordto =author.ToDto();
             return Ok(authordto);
         }
-
+        [Authorize (Roles ="Admin,Employee")]
         [HttpPost]
         public async Task<ActionResult<AuthorDto>> PostAuthor([FromBody] CreateAuthorDto createAuthor)
         {
@@ -55,6 +56,8 @@ namespace BookStoreApi.Controllers
             var createdAuthorDto = createdEntity.ToDto();
             return CreatedAtAction(nameof(GetAuthorById), new { id = newAuthor.Id }, newAuthor);
         }
+
+        [Authorize (Roles ="Admin,Employee")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor(int id, [FromBody] UpdateAuthorDto updateAuthor)
         {
@@ -68,9 +71,10 @@ namespace BookStoreApi.Controllers
             await _authorService.UpdateAuthorAsync(existingAuthors);
             await _authorService.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(existingAuthors);
 
         }
+        [Authorize (Roles ="Admin,Employee")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor([FromRoute] int id)
         {

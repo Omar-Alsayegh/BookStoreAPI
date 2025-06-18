@@ -20,13 +20,14 @@ namespace BookStoreApi.Controllers
             _publisherService = publisherService;
         }
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<IEnumerable<PublisherDto>>> GetAllPublishers([FromQuery] PublisherQueryObject query)
         {
             var publishers = await _publisherService.GetAllPublishersAsync(query);
             var publishersDto = publishers.Select(p => p.ToDto()).ToList();
             return Ok(publishersDto);
         }
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<PublisherDto>> GetPublisherById(int id)
         {
@@ -38,6 +39,7 @@ namespace BookStoreApi.Controllers
             var publisherDto = publisher.ToDto();
             return Ok(publisher);
         }
+        [Authorize(Roles ="Admin")]
         [HttpPost]
         public async Task<ActionResult<PublisherDto>> CreatePublisher([FromBody] CreatePublisherDto createDto)
         {
@@ -47,7 +49,7 @@ namespace BookStoreApi.Controllers
             var createdPublisherDto = newPublisherEntity.ToDto();
             return CreatedAtAction(nameof(GetPublisherById), new { id = newPublisherEntity.Id }, newPublisherEntity);
         }
-
+        [Authorize(Roles ="Admin,Employee")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePublisher(int id, [FromBody] UpdatePublisherDto updateDto)
         {
@@ -59,9 +61,9 @@ namespace BookStoreApi.Controllers
             existingPublisherEntity.UpdateFromDto(updateDto);
             await _publisherService.UpdatePublisherAsync(existingPublisherEntity);
             await _publisherService.SaveChangesAsync();
-            return NoContent();
+            return Ok(existingPublisherEntity);
         }
-
+        [Authorize(Roles ="Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePublisher([FromRoute] int id)
         {

@@ -25,38 +25,58 @@ namespace BookStoreApi.Data
             modelBuilder.Entity<Book>().Property(b => b.Price).HasPrecision(18, 2);
 
             modelBuilder.Entity<BookAuthor>()
-               .HasKey(ba => new { ba.BookId, ba.AuthorId }); // Define composite primary key
+               .HasKey(ba => new { ba.BookId, ba.AuthorId }); 
 
             modelBuilder.Entity<BookAuthor>()
-                .HasOne(ba => ba.Book) // BookAuthor has one Book
-                .WithMany(b => b.BookAuthors) // Book has many BookAuthors
-                .HasForeignKey(ba => ba.BookId).IsRequired().OnDelete(DeleteBehavior.Restrict); // Foreign key to Book
+                .HasOne(ba => ba.Book) 
+                .WithMany(b => b.BookAuthors) 
+                .HasForeignKey(ba => ba.BookId).IsRequired().OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<BookAuthor>()
-                .HasOne(ba => ba.Author) // BookAuthor has one Author
-                .WithMany(a => a.BookAuthors) // Author has many BookAuthors
-                .HasForeignKey(ba => ba.AuthorId); // Foreign key to Author
+                .HasOne(ba => ba.Author)
+                .WithMany(a => a.BookAuthors)
+                .HasForeignKey(ba => ba.AuthorId);
 
             // Configure Book-Publisher One-to-Many relationship (Publisher has many Books)
-            modelBuilder.Entity<Publisher>()
-                .HasMany(p => p.Books) // Publisher has many Books
-                .WithOne(b => b.Publisher) // Book has one Publisher
-                .HasForeignKey(b => b.PublisherId) // Foreign key in Book
-                .OnDelete(DeleteBehavior.Restrict); // Optional: Prevent deleting publisher if books exist
-                                                    // Use .OnDelete(DeleteBehavior.Cascade) for automatic deletion of books.
-                                                    // Let's stick with Restrict for now, it's safer.
+            //modelBuilder.Entity<Publisher>()
+            //    .HasMany(p => p.Books)
+            //    .WithOne(b => b.Publisher) 
+            //    .HasForeignKey(b => b.PublisherId) 
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Book>()
-                .HasMany(p => p.Rentals)
-                .WithOne(b => b.Book)
-                .HasForeignKey(b => b.BookId)
+                .HasOne(p => p.Publisher)
+                .WithMany(p => p.Books)
+                .HasForeignKey(b => b.PublisherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(p => p.Rentals)
-                .WithOne(b => b.User)
+            //modelBuilder.Entity<Book>()
+            //    .HasMany(p => p.Rentals)
+            //    .WithOne(b => b.Book)
+            //    .HasForeignKey(b => b.BookId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Rental>()
+                .HasOne(p => p.Book)
+                .WithMany(p => p.Rentals)
+                .HasForeignKey(p => p.BookId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //modelBuilder.Entity<ApplicationUser>()
+            //    .HasMany(p => p.Rentals)
+            //    .WithOne(b => b.User)
+            //    .HasForeignKey(b => b.UserId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Rental>()
+                .HasOne(p => p.User)
+                .WithMany(p => p.Rentals)
                 .HasForeignKey(b => b.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BookImage>()
+                .HasOne(bcp => bcp.Book)         
+                .WithMany(b => b.BookContentPhotos) 
+                .HasForeignKey(bcp => bcp.BookId)   
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

@@ -20,29 +20,14 @@ namespace BookStoreApi.Services
         }
         public async Task<Author> CreateAuthorAsync(Author newauthor)
         {
-            //var newauthor = createDto.CreateToEntity();
            return  await _authorRepository.AddAsync(newauthor);
-          //  await _authorRepository.SaveChangesAsync();// hay lzm 7ota bl controller
-            //return newauthor.ToDto();
         }
 
         public async Task<bool> DeleteAuthorAsync(Author authortoDelete)
         {
-            //var authortobedel = await _authorRepository.GetByIdAsync(id);
-            //if (authortobedel == null)
-            //{
-            //    return false;
-            //}
             await _authorRepository.DeleteAsync(authortoDelete);
-            //await _authorRepository.SaveChangesAsync();
             return true;
         }
-
-        //public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync()
-        //{
-        //    var authors = await _authorRepository.GetAllAsync();
-        //    return authors.Select(a => a.ToDto()).ToList();
-        //}
         public async Task<IEnumerable<Author>> GetAllAuthorsAsync(AuthorQueryObject query)
         {
            return await _authorRepository.GetAllAuthorsAsync(query);
@@ -55,14 +40,7 @@ namespace BookStoreApi.Services
 
         public async Task<bool> UpdateAuthorAsync(Author existingAuthor)
         {
-           // var existingAuthor = await _authorRepository.GetByIdAsync(id);
-            //if (existingAuthor == null)
-            //{
-            //    return false;
-            //}
-            //existingAuthor.UpdateFromDto(updateDto);
             await _authorRepository.UpdateAsync(existingAuthor);
-           // await _authorRepository.SaveChangesAsync();
             return true;
         }
         public async Task SaveChangesAsync()

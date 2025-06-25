@@ -20,7 +20,9 @@ namespace BookStoreApi.Models.DTOs.Response
       //  [StringLength(10000000, MinimumLength = 0)]
         public string? Content { get; set; }
 
-      //  [Required]
+        public string? CoverImageUrl { get; set; }
+
+        //  [Required]
         public int PublisherId { get; set; }
 
       //  [Required]

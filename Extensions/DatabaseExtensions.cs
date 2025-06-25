@@ -26,7 +26,7 @@ namespace BookStoreApi.Extensions
                 options.Password.RequiredLength = 8;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders(); // Don't forget this!
+            .AddDefaultTokenProviders(); 
             return services;
         }
     }

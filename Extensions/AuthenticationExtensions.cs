@@ -28,14 +28,11 @@ namespace BookStoreApi.Extensions
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(configuration["JWT:SigningKey"])
                         ),
-                        //// You might also want to validate lifetime and set a clock skew
-                        //ValidateLifetime = true,
-                        //ClockSkew = TimeSpan.Zero // Recommended for no clock skew tolerance
                     };
                 });
 
-                services.AddAuthorization(); // Authorization typically goes with authentication
-                                             // This enables the [Authorize] attribute
+                services.AddAuthorization(); 
+                                             
                 return services;
             }
     }

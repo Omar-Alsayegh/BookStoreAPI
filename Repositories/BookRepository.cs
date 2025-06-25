@@ -18,6 +18,7 @@ namespace BookStoreApi.Repositories
                 .ToListAsync();
         }
 
+
         public override async Task<Book?> GetByIdAsync(int id)
         {
             return await _dbSet
@@ -25,6 +26,26 @@ namespace BookStoreApi.Repositories
                     .ThenInclude(ba => ba.Author)
                 .Include(b => b.Publisher)
                 .FirstOrDefaultAsync(b => b.Id == id);
+        }
+
+        public async Task<Book?> GetByIdWithIncludesAsync(int id, string includeProperties, CancellationToken cancellationToken)
+        {
+            IQueryable<Book> query = _dbSet; // Start with _dbSet (which is DbSet<Book>)
+
+            // Apply includes first
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (string includeProperty in includeProperties.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty); // Include now works because query is IQueryable<Book>
+                }
+            }
+
+            // Apply filters once at the end
+            // Assuming your Book entity has an 'Id' property (int) and 'InactiveDate' (DateTime?)
+            query = query.Where(x => x.Id == id);
+
+            return await query.SingleOrDefaultAsync(cancellationToken);
         }
 
         // Removed: GetBooksByAuthorAsync method as GetFilteredBooksQueryAsync covers its functionality.

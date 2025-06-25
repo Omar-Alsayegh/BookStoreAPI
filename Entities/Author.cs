@@ -2,7 +2,7 @@
 
 namespace BookStoreApi.Entities
 {
-    public class Author
+    public class Author: BaseEntity
     {
         public Author()
         {

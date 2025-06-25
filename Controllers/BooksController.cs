@@ -5,7 +5,9 @@ using BookStoreApi.Extra;
 using BookStoreApi.Mappings;
 using BookStoreApi.Models.DTOs;
 using BookStoreApi.Models.DTOs.Response;
+using BookStoreApi.Repositories;
 using BookStoreApi.Services;
+using BookStoreApi.Services.FileStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,13 +22,17 @@ namespace BookStoreApi.Controllers
         private readonly IBookService _bookService;
         private readonly IAuthorService _authorService;
         private readonly ILogger<BooksController> _logger;
-        public BooksController(IBookService bookService, IAuthorService authorService, ILogger<BooksController> logger)
+        private readonly IFileStorageService _fileStorageService;
+        private readonly IGenericRepository<BookImage> _bookImageRepository;
+        public BooksController(IBookService bookService, IAuthorService authorService, ILogger<BooksController> logger, IFileStorageService fileStorageService, IGenericRepository<BookImage> bookImageRepository)
         {
             _bookService = bookService;
             _authorService = authorService;
             _logger = logger;
+            _fileStorageService = fileStorageService;
+            _bookImageRepository = bookImageRepository;
         }
-     
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks([FromQuery] QueryObject query)
         {
@@ -34,7 +40,7 @@ namespace BookStoreApi.Controllers
             var booksDto = Books.Select(b => b.ToBookDto()).ToList();
             return Ok(Books);
         }
-       // [Authorize (Roles ="Admin,Employee")]
+        // [Authorize (Roles ="Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<BookDto>> GetBook(int id)
         {
@@ -46,7 +52,7 @@ namespace BookStoreApi.Controllers
             var bookdto = book.ToBookDto();
             return Ok(book);
         }
-        [Authorize (Roles ="Admin,Employee")]
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPost]
         public async Task<ActionResult<BookDto>> PostBook([FromBody] CreateBookDto createBook)
         {
@@ -90,8 +96,8 @@ namespace BookStoreApi.Controllers
             }
 
 
-            }
-        [Authorize(Roles ="Admin,Employee")]
+        }
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{id}")]
         public async Task<ActionResult<BookDto>> PutBook(int id, UpdateBookDto updateBook)
         {
@@ -104,7 +110,7 @@ namespace BookStoreApi.Controllers
             existingBook.PublisherId = updateBook.PublisherId;
             if (updateBook.AuthorIds == null || !updateBook.AuthorIds.Any())
             {
-                return BadRequest("A book must have at least one author."); 
+                return BadRequest("A book must have at least one author.");
             }
             var currentAuthorIds = existingBook.BookAuthors.Select(ba => ba.AuthorId).ToHashSet();
             var newAuthorIds = updateBook.AuthorIds.ToHashSet();
@@ -113,7 +119,7 @@ namespace BookStoreApi.Controllers
                 .ToList();
             foreach (var bookAuthor in bookAuthorsToRemove)
             {
-                existingBook.BookAuthors.Remove(bookAuthor); 
+                existingBook.BookAuthors.Remove(bookAuthor);
             }
             foreach (var newAuthorId in newAuthorIds)
             {
@@ -122,7 +128,7 @@ namespace BookStoreApi.Controllers
                     var author = await _authorService.GetAuthorByIdAsync(newAuthorId);
                     if (author == null)
                     {
-                        return BadRequest($"Author with ID {newAuthorId} not found."); 
+                        return BadRequest($"Author with ID {newAuthorId} not found.");
                     }
 
                     existingBook.BookAuthors.Add(new BookAuthor { BookId = existingBook.Id, AuthorId = newAuthorId });
@@ -136,18 +142,18 @@ namespace BookStoreApi.Controllers
 
                 return Ok(existingBook);
             }
-            catch (InvalidOperationException ) 
+            catch (InvalidOperationException)
             {
                 return BadRequest();
             }
-            catch (Exception ) 
+            catch (Exception)
             {
-               
-                return StatusCode(500, new { message = "An error occurred while updating the book."});
+
+                return StatusCode(500, new { message = "An error occurred while updating the book." });
             }
-            
+
         }
-        [Authorize (Roles ="Admin,Employee")]
+        [Authorize(Roles = "Admin,Employee")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
@@ -160,6 +166,169 @@ namespace BookStoreApi.Controllers
             await _bookService.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPut("{id}/cover-photo")]
+        [Consumes("multipart/form-data")] 
+        public async Task<IActionResult> UploadBookCover(int id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded or file is empty.");
+            }
+
+            var book = await _bookService.GetBookByIdAsync(id);
+            if (book == null)
+            {
+                return NotFound($"Book with ID {id} not found.");
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid file type. Only JPG, JPEG, PNG files are allowed.");
+            }
+
+            // Delete old cover photo if it exists
+            if (!string.IsNullOrEmpty(book.CoverImageUrl))
+            {
+                _fileStorageService.DeleteFile(book.CoverImageUrl);
+            }
+
+            // Save new cover photo
+            string newCoverUrl = await _fileStorageService.SaveFileAsync(file, "Books"); // "Books" is the subfolder
+            book.CoverImageUrl = newCoverUrl;
+
+            await _bookService.UpdateBookAsync(book); 
+            await _bookService.SaveChangesAsync();
+
+            // Return the updated book DTO with the new URL
+            var bookDto = book.ToBookDto(); 
+            return Ok(bookDto);
+        }
+
+        [HttpDelete("{id}/cover-photo")]
+        public async Task<IActionResult> DeleteBookCover(int id)
+        {
+            var book = await _bookService.GetBookByIdAsync(id);
+            if (book == null)
+            {
+                return NotFound($"Book with ID {id} not found.");
+            }
+
+            if (string.IsNullOrEmpty(book.CoverImageUrl))
+            {
+                return NotFound("Book does not have a cover photo.");
+            }
+
+            _fileStorageService.DeleteFile(book.CoverImageUrl);
+            book.CoverImageUrl = null; // Clear the URL in the database
+
+            await _bookService.UpdateBookAsync(book);
+            await _bookService.SaveChangesAsync();
+
+            return NoContent(); 
+        }
+
+        [HttpPost("{bookId}/content-photos")]
+        [Consumes("multipart/form-data")] // Important for file uploads
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UploadBookContentPhoto(int bookId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded or file is empty.");
+            }
+
+            // 1. Get the book from the database
+            // Ensure GetBookByIdAsync loads BookContentPhotos (which we updated it to do)
+            var book = await _bookService.GetBookByIdAsync(bookId);
+            if (book == null)
+            {
+                return NotFound($"Book with ID {bookId} not found.");
+            }
+
+            try
+            {     
+                //2.Save the file
+                // Define a folder path specific to book content photos (e.g., "bookcontent")
+                //DATABASE STORAGE
+                byte[] imageData;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    imageData = memoryStream.ToArray();
+                }
+
+
+
+                //LOCAL STORAGE
+
+                //var folderName = "bookcontent";
+                //var imageUrl = await _fileStorageService.SaveFileAsync(file, folderName);
+
+                //if (string.IsNullOrEmpty(imageUrl))
+                //{
+                //    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the image file.");
+                //}
+
+                // 3. Create a new BookContentPhoto entity
+                var bookContentPhoto = new BookImage
+                {
+                   // ImageUrl = imageUrl,
+                    BookId = book.Id, 
+                    ImageData=imageData,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.Identity?.Name ?? "System",
+                    ModifiedAt = DateTime.UtcNow,
+                    ModifiedBy = User.Identity?.Name ?? "System"
+                };
+
+                // 4. Add the BookContentPhoto to the book's collection and to the database context
+                book.BookContentPhotos.Add(bookContentPhoto);
+                await _bookService.UpdateBookAsync(book); // This should call the repository's update and save change
+                await _bookService.SaveChangesAsync();
+                // 5. Return the updated BookDto
+                var updatedBook = await _bookService.GetBookByIdAsync(bookId);
+                return Ok(updatedBook.ToBookDto());
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "Error uploading book content photo for Book ID {BookId}", bookId);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while uploading the photo: {ex.Message}");
+            }
+        }
+
+        [HttpGet("content-photos/{photoId}")] 
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetBookContentPhoto(int photoId)
+        {
+            try
+            {
+                var bookImage = await _bookImageRepository.GetByIdAsync(photoId);
+
+                if (bookImage == null || bookImage.ImageData == null || bookImage.ImageData.Length == 0)
+                {
+                    return NotFound("Book content photo not found or no image data available.");
+                }
+
+                // Determine the content type (MIME type) of the image.
+                // This is crucial for the browser to display the image correctly.
+                string contentType = "image/jpg"; 
+
+                return File(bookImage.ImageData, contentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving book content photo with ID {PhotoId}.", photoId);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
     }
 }

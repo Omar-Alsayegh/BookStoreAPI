@@ -8,6 +8,7 @@ namespace BookStoreApi.Repositories
     {
         Task<IEnumerable<Book>> GetFilteredBooksQueryAsync(QueryObject query);
         Task<Book> GetBookWithAuthorsAsync(string bookTitle);
+        Task<Book?> GetByIdAsync(int id);
 
         // Task<IEnumerable<Book>> GetBooksByAuthorAsync(string authorName);
     }

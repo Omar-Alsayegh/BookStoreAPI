@@ -13,6 +13,7 @@ namespace BookStoreApi.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public DateTime? DateJoined { get; set; }
+        public string? ProfilePictureUrl { get; set; }
 
         public DateTime? LastPasswordResetRequestUtc { get; set; }
         public ICollection<Rental> Rentals { get; set; }

@@ -4,6 +4,7 @@ using BookStoreApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250623092954_AddImageUrlsToUsersAndBooksAndAddedBaseEntity")]
+    partial class AddImageUrlsToUsersAndBooksAndAddedBaseEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,50 +141,6 @@ namespace BookStoreApi.Migrations
                     b.HasIndex("AuthorId");
 
                     b.ToTable("BookAuthors");
-                });
-
-            modelBuilder.Entity("BookStoreApi.Entities.BookImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ArchiveReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("InactiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookId");
-
-                    b.ToTable("BookImage");
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Publisher", b =>
@@ -530,17 +489,6 @@ namespace BookStoreApi.Migrations
                     b.Navigation("Book");
                 });
 
-            modelBuilder.Entity("BookStoreApi.Entities.BookImage", b =>
-                {
-                    b.HasOne("BookStoreApi.Entities.Book", "Book")
-                        .WithMany("BookContentPhotos")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-                });
-
             modelBuilder.Entity("BookStoreApi.Entities.Rental", b =>
                 {
                     b.HasOne("BookStoreApi.Entities.Book", "Book")
@@ -619,8 +567,6 @@ namespace BookStoreApi.Migrations
             modelBuilder.Entity("BookStoreApi.Entities.Book", b =>
                 {
                     b.Navigation("BookAuthors");
-
-                    b.Navigation("BookContentPhotos");
 
                     b.Navigation("Rentals");
                 });

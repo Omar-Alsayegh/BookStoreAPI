@@ -1,10 +1,12 @@
 ﻿using Azure.Core;
 using BookStoreApi.Controllers;
 using BookStoreApi.Models;
+using BookStoreApi.Models.DTOs;
 using BookStoreApi.Models.DTOs.Auth;
 using BookStoreApi.Models.DTOs.Response;
 using BookStoreApi.Services;
 using BookStoreApi.Services.Email;
+using BookStoreApi.Services.FileStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,56 +26,17 @@ namespace BookStoreApi.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
-        public AccountController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ILogger<AccountController> logger, IEmailService emailService, IConfiguration configuration)
+        private readonly IFileStorageService _fileStorageService;
+        public AccountController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ILogger<AccountController> logger, IEmailService emailService, IConfiguration configuration, IFileStorageService fileStorageService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _logger = logger;
             _emailService = emailService;
             _configuration = configuration;
+            _fileStorageService = fileStorageService;
         }
-
-        //[HttpPost("register")]
-
-        //public async Task<IActionResult> Result([FromBody] RegisterDto registerDto)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid)
-        //        {
-        //            return BadRequest(ModelState);
-        //        }
-        //        var appuser = new ApplicationUser
-        //        {
-        //            UserName = registerDto.Username,
-        //            Email = registerDto.EmailAddress
-        //        };
-
-        //        var createduser = await _userManager.CreateAsync(appuser, registerDto.Password);
-        //        if (createduser.Succeeded) {
-        //            var roleResult = await _userManager.AddToRoleAsync(appuser, "User");
-        //            if (roleResult.Succeeded)
-        //            {
-        //                return Ok("User Created");
-        //            }
-
-        //            else
-        //            {
-        //                return StatusCode(500, roleResult.Errors);
-        //            }
-        //            }
-        //        else { 
-        //            return StatusCode(500, createduser.Errors);
-        //            }
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode (500, ex.Message);
-        //    }
-
-        //}
-
+        
         [HttpPost("Register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -97,10 +60,10 @@ namespace BookStoreApi.Controllers
             var newUser = new ApplicationUser
             {
                 Email = request.EmailAddress,
-                UserName = request.EmailAddress, // Often set UserName to Email
-                FirstName = request.FirstName, // Optional: if you added these to ApplicationUser
-                LastName = request.LastName,   // Optional
-                DateJoined = DateTime.UtcNow // Optional
+                UserName = request.EmailAddress, 
+                FirstName = request.FirstName, 
+                LastName = request.LastName,   
+                DateJoined = DateTime.UtcNow 
             };
             var result = await _userManager.CreateAsync(newUser, request.Password);
             if (result.Succeeded)
@@ -192,16 +155,16 @@ namespace BookStoreApi.Controllers
             await _userManager.UpdateAsync(user);
 
             var emailSubject = "Reset Your Password for BookStore API";
-            var tokenExpirationHours = _userManager.Options.Tokens.PasswordResetTokenProvider == "Default" ? 1 : // Default is 1 hour
-                                  _userManager.Options.Tokens.PasswordResetTokenProvider == "DataProtectorTokenProvider" ? 1 : // DataProtector also default 1 hour
-                                                                                                                               // Add specific logic if you use custom token providers
+            var tokenExpirationHours = _userManager.Options.Tokens.PasswordResetTokenProvider == "Default" ? 1 : 
+                                  _userManager.Options.Tokens.PasswordResetTokenProvider == "DataProtectorTokenProvider" ? 1 : 
+                                                                                                                               
                                   1;
             var emailMessage = $"<!DOCTYPE html><html><head><title>Password Reset</title></head><body>" +
                            $"<p>Dear {user.UserName ?? user.Email},</p>" +
                            $"<p>You are receiving this email because we received a password reset request for your account. If you did not request a password reset, please ignore this email.</p>" +
                            $"<p>To reset your password, please click on the link below:</p>" +
                            $"<p><a href=\"{resetUrl}\">Reset My Password</a></p>" +
-                           $"<p>This link will expire in **{tokenExpirationHours} hour(s)** for security reasons.</p>" + // <--- NEW: Expiry info
+                           $"<p>This link will expire in **{tokenExpirationHours} hour(s)** for security reasons.</p>" + 
                            $"<p>If the link above does not work, copy and paste the following URL into your browser:</p>" +
                            $"<p>{resetUrl}</p>" +
                            $"<br>" +
@@ -244,11 +207,11 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpPost("admin/assign-role")]
-        [Authorize(Roles = "Admin")] // Only users with the "Admin" role can access this
+        [Authorize(Roles = "Admin")] 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // User not found
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // Access denied due to roles
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] 
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AssignRole([FromBody] ManageUserRoleRequestDto request)
         {
@@ -264,7 +227,7 @@ namespace BookStoreApi.Controllers
             }
 
             // Find the user by email or username
-            // We try ByEmail first, then ByName as UserName is often set to Email.
+            // Try ByEmail first, then ByName as UserName is often set to Email.
             var user = await _userManager.FindByEmailAsync(request.UserIdentifier) ?? await _userManager.FindByNameAsync(request.UserIdentifier);
             if (user == null)
             {
@@ -308,14 +271,14 @@ namespace BookStoreApi.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPost("admin/remove-role")] // Using POST for state change, could also be DELETE if body is allowed
+        [HttpPost("admin/remove-role")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // User not found
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // Not an Admin
+        [ProducesResponseType(StatusCodes.Status404NotFound)] 
+        [ProducesResponseType(StatusCodes.Status403Forbidden)] 
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> RemoveRole([FromBody] ManageUserRoleRequestDto request) // Reusing the DTO
+        public async Task<IActionResult> RemoveRole([FromBody] ManageUserRoleRequestDto request)
         {
             var currentAdminEmail = User.Identity?.Name;
             _logger.LogInformation("Admin '{AdminEmail}' attempting to remove role '{RoleName}' from user '{UserIdentifier}'.",
@@ -408,6 +371,79 @@ namespace BookStoreApi.Controllers
                 ModelState.AddModelError(string.Empty, error.Description);
             }
             return BadRequest(ModelState);
+        }
+
+        [HttpPut("{id}/profile-photo")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadProfilePhoto(string id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded or file is empty.");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid file type. Only JPG, JPEG, PNG, GIF files are allowed.");
+            }
+
+            if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+            {
+                _fileStorageService.DeleteFile(user.ProfilePictureUrl);
+            }
+
+            string newProfilePhotoUrl = await _fileStorageService.SaveFileAsync(file, "Users"); // "Users" subfolder
+            user.ProfilePictureUrl = newProfilePhotoUrl;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors.Select(e => e.Description));
+            }
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName!,
+                Email = user.Email!,
+                ProfilePictureUrl = user.ProfilePictureUrl
+            };
+
+            return Ok(userDto);
+        }
+
+        [HttpDelete("{id}/profile-photo")]
+        public async Task<IActionResult> DeleteProfilePhoto(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+
+            if (string.IsNullOrEmpty(user.ProfilePictureUrl))
+            {
+                return NotFound("User does not have a profile photo.");
+            }
+
+            _fileStorageService.DeleteFile(user.ProfilePictureUrl);
+            user.ProfilePictureUrl = null; 
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors.Select(e => e.Description));
+            }
+
+            return NoContent(); 
         }
     }
 }

@@ -28,7 +28,7 @@ namespace BookStoreApi.Services.Email
                 From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"]),
                 Subject = subject,
                 Body = message,
-                IsBodyHtml = true, // Set to true if your message contains HTML
+                IsBodyHtml = true, 
             };
             mailMessage.To.Add(toEmail);
 

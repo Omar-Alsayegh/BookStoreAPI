@@ -1,6 +1,43 @@
 [
   {
     "ContainingType": "BookStoreApi.Controllers.AccountController",
+    "Method": "UploadProfilePhoto",
+    "RelativePath": "api/account/{id}/profile-photo",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BookStoreApi.Controllers.AccountController",
+    "Method": "DeleteProfilePhoto",
+    "RelativePath": "api/account/{id}/profile-photo",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BookStoreApi.Controllers.AccountController",
     "Method": "AssignRole",
     "RelativePath": "api/account/admin/assign-role",
     "HttpMethod": "POST",
@@ -464,6 +501,56 @@
   },
   {
     "ContainingType": "BookStoreApi.Controllers.BooksController",
+    "Method": "UploadBookContentPhoto",
+    "RelativePath": "api/Books/{bookId}/content-photos",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
+  },
+  {
+    "ContainingType": "BookStoreApi.Controllers.BooksController",
     "Method": "GetBook",
     "RelativePath": "api/Books/{id}",
     "HttpMethod": "GET",
@@ -523,6 +610,43 @@
     "ContainingType": "BookStoreApi.Controllers.BooksController",
     "Method": "DeleteBook",
     "RelativePath": "api/Books/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BookStoreApi.Controllers.BooksController",
+    "Method": "UploadBookCover",
+    "RelativePath": "api/Books/{id}/cover-photo",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BookStoreApi.Controllers.BooksController",
+    "Method": "DeleteBookCover",
+    "RelativePath": "api/Books/{id}/cover-photo",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,

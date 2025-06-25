@@ -1,5 +1,8 @@
 using BookStoreApi.Data;
 using BookStoreApi.Extensions;
+using BookStoreApi.Repositories;
+using BookStoreApi.Services.FileStorage;
+using Microsoft.Extensions.FileProviders;
 using NLog;
 using NLog.Web;
 
@@ -22,12 +25,16 @@ try
     builder.Services.AddJsonSerializationOptions(); 
     builder.Services.AddApplicationServices();       
     builder.Services.AddApplicationDbContext(builder.Configuration); 
+    builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
     builder.Services.AddIdentityConfiguration();    
     builder.Services.AddJwtAuthentication(builder.Configuration); 
     builder.Services.AddGlobalExceptionHandler();
     builder.Services.AddControllers();
     builder.Services.AddAppFluentValidation();
+
+    builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
     
+
 
     var app = builder.Build();
 
@@ -56,6 +63,21 @@ try
     {
         app.UseExceptionHandler();
     }
+
+    string uploadsFolder = app.Configuration["FileStorageSettings:UploadsFolder"] ?? "Uploads";
+    string uploadsPath = Path.Combine(app.Environment.ContentRootPath, uploadsFolder);
+
+    if (!Directory.Exists(uploadsPath))
+    {
+        Directory.CreateDirectory(uploadsPath);
+    }
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadsPath),
+        RequestPath = $"/{uploadsFolder}" 
+    });
+
 
     app.UseAuthentication();
     app.UseAuthorization();

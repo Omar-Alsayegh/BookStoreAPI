@@ -18,7 +18,6 @@ namespace BookStoreApi.Extensions
                 var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var loggerForSeeding = serviceProvider.GetRequiredService<ILogger<Program>>();
 
-                // Seed roles
                 string[] roleNames = { "Admin", "User" };
                 foreach (var roleName in roleNames)
                 {
@@ -29,7 +28,6 @@ namespace BookStoreApi.Extensions
                     }
                 }
 
-                // Seed an Admin user
                 var adminUser = await userManager.FindByEmailAsync("admin@example.com");
                 if (adminUser == null)
                 {
@@ -41,7 +39,7 @@ namespace BookStoreApi.Extensions
                         LastName = "Admin",
                         DateJoined = DateTime.UtcNow
                     };
-                    var createAdminResult = await userManager.CreateAsync(adminUser, "Admin@123"); // <-- CHANGE THIS PASSWORD IN PRODUCTION!
+                    var createAdminResult = await userManager.CreateAsync(adminUser, "Admin@123");
                     if (createAdminResult.Succeeded)
                     {
                         await userManager.AddToRoleAsync(adminUser, "Admin");

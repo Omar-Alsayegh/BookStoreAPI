@@ -13,7 +13,7 @@ namespace BookStoreApi.Entities
         Cancelled
     }
 
-    public class Rental
+    public class Rental: BaseEntity
     {
         public int Id { get; set; }
 

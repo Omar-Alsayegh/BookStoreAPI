@@ -21,12 +21,6 @@ namespace BookStoreApi.Controllers
         }
         [Authorize (Roles ="Admin,Employee")]
         [HttpGet]
-        //public async Task<ActionResult<IAsyncEnumerable<AuthorDto>>> GetAllAuthors()
-        //{
-        //    var authors = await _authorService.GetAllAuthorsAsync();
-        //    authors = (IEnumerable<Author>)authors.Select(static a => a.ToDto());
-        //    return Ok(authors);
-        //}
         public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors([FromQuery] AuthorQueryObject query)
         {
             var authors =await _authorService.GetAllAuthorsAsync(query);

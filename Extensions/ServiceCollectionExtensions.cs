@@ -39,10 +39,7 @@ namespace BookStoreApi.Extensions
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-                    // Optional: You might also want camelCase naming for JSON properties, common in APIs
-                    // options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                    // Optional: Enable pretty printing for easier readability in development
-                    // options.JsonSerializerOptions.WriteIndented = services.BuildServiceProvider().GetRequiredService<IWebHostEnvironment>().IsDevelopment();
+             
                 });
             return services;
         }

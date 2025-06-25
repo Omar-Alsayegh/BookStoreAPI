@@ -54,6 +54,10 @@ namespace BookStoreApi.Mappings
             {
                 throw new InvalidOperationException("Author navigation property was not loaded for Book ToDto conversion.");
             }
+            if (entity.BookContentPhotos == null)
+            {
+                throw new InvalidOperationException("BookContentPhotos navigation property was not loaded for Book DTO conversion.");
+            }
             return new BookDto
             {
                 Id = entity.Id,
@@ -62,7 +66,13 @@ namespace BookStoreApi.Mappings
                 Price = entity.Price,
                 Content = entity.Content,
                 Publisher = entity.Publisher.ToDto(),
-                Authors = entity.BookAuthors?.Select(ba => ba.Author.ToDto()).ToList() 
+                StockQuantity = entity.StockQuantity,
+                CoverImageUrl = entity.CoverImageUrl,
+                //ContentImageUrls = entity.BookContentPhotos.Select(bcp => bcp.ImageUrl).ToList(),
+                ContentImageUrls = entity.BookContentPhotos?.Select(bcp =>
+                    $"/api/books/content-photos/{bcp.Id}"
+                ).ToList() ?? new List<string>(),
+                Authors = entity.BookAuthors?.Select(ba => ba.Author.ToDto()).ToList(),
             };
 
 

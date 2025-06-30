@@ -1,12 +1,13 @@
-﻿using BookStoreApi.Mappings;
-using BookStoreApi.Models.DTOs;
-using BookStoreApi.Services;
-using Microsoft.AspNetCore.Mvc;
-using BookStoreApi.Entities;
-using BookStoreApi.Repositories;
+﻿using BookStoreApi.Entities;
 using BookStoreApi.Extra;
+using BookStoreApi.Mappings;
+using BookStoreApi.Models.DTOs;
 using BookStoreApi.Models.DTOs.Response;
+using BookStoreApi.Repositories;
+using BookStoreApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BookStoreApi.Controllers
 {
@@ -44,11 +45,23 @@ namespace BookStoreApi.Controllers
         [HttpPost]
         public async Task<ActionResult<AuthorDto>> PostAuthor([FromBody] CreateAuthorDto createAuthor)
         {
-            var newAuthor =createAuthor.CreateToEntity();
-            var createdEntity= await _authorService.CreateAuthorAsync(newAuthor);
+            var author = new Author
+            {
+                Name = createAuthor.Name,
+                Birthdate = createAuthor.Birthdate
+            };
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            author.CreatedBy = userId;          
+            author.CreatedAt = DateTime.UtcNow;
+
+            author.ModifiedAt = DateTime.UtcNow;
+            author.ModifiedBy = userId;
+
+            var createdEntity= await _authorService.CreateAuthorAsync(author);
             await _authorService.SaveChangesAsync();
             var createdAuthorDto = createdEntity.ToDto();
-            return CreatedAtAction(nameof(GetAuthorById), new { id = newAuthor.Id }, newAuthor);
+            return CreatedAtAction(nameof(GetAuthorById), new { id = author.Id }, author);
         }
 
         [Authorize (Roles ="Admin,Employee")]

@@ -10,12 +10,34 @@ namespace BookStoreApi.Services.FileStorage
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly string _uploadsFolder;
-
+        private readonly string _requestPath;
         public LocalFileStorageService(IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _webHostEnvironment = webHostEnvironment;
             _uploadsFolder = configuration["FileStorageSettings:UploadsFolder"] ?? "Uploads";
+            _requestPath = configuration["FileStorage:RequestPath"] ?? "/Uploads";
         }
+
+        public string GetPhysicalPath(string fileUrl)
+        {
+            if (string.IsNullOrEmpty(fileUrl))
+            {
+                return null;
+            }
+
+            string relativePathWithinUploads = fileUrl;
+            if (fileUrl.StartsWith(_requestPath, StringComparison.OrdinalIgnoreCase))
+            {
+                relativePathWithinUploads = fileUrl.Substring(_requestPath.Length);
+            }
+
+            relativePathWithinUploads = relativePathWithinUploads.TrimStart('/');
+
+            var absolutePath = Path.Combine(_webHostEnvironment.ContentRootPath, _uploadsFolder, relativePathWithinUploads);
+
+            return absolutePath;
+        }
+
         void IFileStorageService.DeleteFile(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
@@ -32,10 +54,10 @@ namespace BookStoreApi.Services.FileStorage
             }
         }
 
-        string IFileStorageService.GetFilePath(string fileName, string subFolder)
-        {
-            return $"/{_uploadsFolder}/{subFolder}/{fileName}";
-        }
+        //string IFileStorageService.GetFilePath(string fileName, string subFolder)
+        //{
+        //    return $"/{_uploadsFolder}/{subFolder}/{fileName}";
+        //}
 
         async Task<string> IFileStorageService.SaveFileAsync(IFormFile file, string subFolder)
         {

@@ -5,6 +5,7 @@ namespace BookStoreApi.Services.FileStorage
     {
         Task<string> SaveFileAsync(IFormFile file, string subFolder);
         void DeleteFile(string filePath);
-        string GetFilePath(string fileName, string subFolder);
+        //  string GetFilePath(string fileName, string subFolder);
+        string GetPhysicalPath(string fileUrl);
     }
 }

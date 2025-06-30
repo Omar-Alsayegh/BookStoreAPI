@@ -8,5 +8,6 @@ namespace BookStoreApi.Models.DTOs.Response
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
         public DateTime Birthdate { get; set; }
+
     }
 }

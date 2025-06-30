@@ -108,6 +108,8 @@ namespace BookStoreApi.Repositories
             return await _context.Books
            .Include(b => b.BookAuthors)
                .ThenInclude(ba => ba.Author)
+               .Include(b => b.Publisher)
+        .Include(b => b.BookContentPhotos)
            .FirstOrDefaultAsync(b => b.Title == bookTitle);
         }
     }

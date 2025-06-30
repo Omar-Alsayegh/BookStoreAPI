@@ -33,6 +33,7 @@ try
     builder.Services.AddAppFluentValidation();
 
     builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
     
 
 

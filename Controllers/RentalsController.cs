@@ -51,7 +51,7 @@ namespace BookStoreApi.Controllers
         }
 
 
-
+        [Authorize (Roles ="Admin,Employee,Customer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RentalDto>>> GetRentalsAsync()
@@ -83,7 +83,7 @@ namespace BookStoreApi.Controllers
             _logger.LogInformation("Retrieved {Count} rentals for User ID {UserId}.", rentals.Count, userId);
             return Ok(rentals);
         }
-
+        [Authorize(Roles = "Admin,Employee,Customer")]
         [HttpPost]
         public async Task<IActionResult> AddRentalAsync([FromBody] RentalRequestDto request) { 
             var user= User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -121,7 +121,11 @@ namespace BookStoreApi.Controllers
                 RentalDate = DateTime.UtcNow,
                 ApprovedBy = null,
                 Status = RentalStatus.Pending,
-                ExpectedReturnDate =null
+                ExpectedReturnDate =null,
+                CreatedBy = user,    
+                ModifiedBy = user,
+                CreatedAt = DateTime.UtcNow, 
+                ModifiedAt = DateTime.UtcNow
             };
             _context.Rentals.Add(rental);
             _context.SaveChanges();

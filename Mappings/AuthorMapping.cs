@@ -11,7 +11,7 @@ namespace BookStoreApi.Mappings
             return new Author
             {
                 Name = createDto.Name,
-                Birthdate = createDto.Birthdate
+                Birthdate = createDto.Birthdate,
             };
         }
 

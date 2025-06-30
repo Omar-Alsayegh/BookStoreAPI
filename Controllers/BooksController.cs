@@ -10,7 +10,9 @@ using BookStoreApi.Services;
 using BookStoreApi.Services.FileStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using static System.Reflection.Metadata.BlobBuilder;
 
 namespace BookStoreApi.Controllers
@@ -60,6 +62,18 @@ namespace BookStoreApi.Controllers
             {
                 var newBook = createBook.CreateToBook();
 
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("PostBook: User ID not found in claims. Defaulting CreatedBy/ModifiedBy to 'System'.");
+                    userId = "System"; 
+                }
+
+                newBook.CreatedAt = DateTime.UtcNow;
+                newBook.CreatedBy = userId;
+                newBook.ModifiedAt = DateTime.UtcNow; 
+                newBook.ModifiedBy = userId;
+
                 if (createBook.AuthorIds != null && createBook.AuthorIds.Any())
                 {
                     newBook.BookAuthors = new List<BookAuthor>();
@@ -87,7 +101,7 @@ namespace BookStoreApi.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError("An Error occured", e.Message);
+                _logger.LogError(e, "An Error occurred during PostBook for request: {@CreateBookDto}", createBook);
                 return StatusCode(500, new
                 {
                     message = "An unexpected error occurred while processing your request.",
@@ -237,7 +251,7 @@ namespace BookStoreApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UploadBookContentPhoto(int bookId, IFormFile file)
+        public async Task<IActionResult> UploadBookContentPhoto([FromRoute]int bookId, IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -253,35 +267,35 @@ namespace BookStoreApi.Controllers
             }
 
             try
-            {     
+            {
                 //2.Save the file
                 // Define a folder path specific to book content photos (e.g., "bookcontent")
                 //DATABASE STORAGE
-                byte[] imageData;
-                using (var memoryStream = new MemoryStream())
-                {
-                    await file.CopyToAsync(memoryStream);
-                    imageData = memoryStream.ToArray();
-                }
+                //byte[] imageData;
+                //using (var memoryStream = new MemoryStream())
+                //{
+                //    await file.CopyToAsync(memoryStream);
+                //    imageData = memoryStream.ToArray();
+                //}
 
 
 
                 //LOCAL STORAGE
 
-                //var folderName = "bookcontent";
-                //var imageUrl = await _fileStorageService.SaveFileAsync(file, folderName);
+                var folderName = "bookcontent";
+                var imageUrl = await _fileStorageService.SaveFileAsync(file, folderName);
 
-                //if (string.IsNullOrEmpty(imageUrl))
-                //{
-                //    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the image file.");
-                //}
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the image file.");
+                }
 
                 // 3. Create a new BookContentPhoto entity
                 var bookContentPhoto = new BookImage
                 {
                    // ImageUrl = imageUrl,
                     BookId = book.Id, 
-                    ImageData=imageData,
+                    ImageUrl =imageUrl,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = User.Identity?.Name ?? "System",
                     ModifiedAt = DateTime.UtcNow,
@@ -298,7 +312,7 @@ namespace BookStoreApi.Controllers
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Error uploading book content photo for Book ID {BookId}", bookId);
+                _logger.LogError(ex, "Error uploading book content photo for Book ID {BookId}: {ErrorMessage}", bookId, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while uploading the photo: {ex.Message}");
             }
         }
@@ -313,16 +327,27 @@ namespace BookStoreApi.Controllers
             {
                 var bookImage = await _bookImageRepository.GetByIdAsync(photoId);
 
-                if (bookImage == null || bookImage.ImageData == null || bookImage.ImageData.Length == 0)
+                if (bookImage == null || bookImage.ImageUrl == null || bookImage.ImageUrl.Length == 0)
                 {
                     return NotFound("Book content photo not found or no image data available.");
                 }
+                var physicalPath = _fileStorageService.GetPhysicalPath(bookImage.ImageUrl);
 
-                // Determine the content type (MIME type) of the image.
-                // This is crucial for the browser to display the image correctly.
-                string contentType = "image/jpg"; 
+                if (string.IsNullOrEmpty(physicalPath) || !System.IO.File.Exists(physicalPath))
+                {
+                    _logger.LogWarning("Physical file for Book Image ID {PhotoId} not found or invalid path: {Path}", photoId, physicalPath);
+                    return NotFound("Book content photo file does not exist on server.");
+                }
 
-                return File(bookImage.ImageData, contentType);
+                var provider = new FileExtensionContentTypeProvider();
+                string contentType;
+                if (!provider.TryGetContentType(physicalPath, out contentType))
+                {
+                    contentType = "application/octet-stream";
+                    _logger.LogWarning("Could not determine content type for file: {Path}. Defaulting to octet-stream.", physicalPath);
+                }
+
+                return PhysicalFile(physicalPath, contentType);
             }
             catch (Exception ex)
             {

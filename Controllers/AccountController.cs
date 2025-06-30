@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 using System.Text;
 
 namespace BookStoreApi.Controllers
@@ -395,13 +397,17 @@ namespace BookStoreApi.Controllers
                 return BadRequest("Invalid file type. Only JPG, JPEG, PNG, GIF files are allowed.");
             }
 
-            if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-            {
-                _fileStorageService.DeleteFile(user.ProfilePictureUrl);
-            }
+            //if (!string.IsNullOrEmpty(user.ProfilePictureData))
+            //{
+            //    _fileStorageService.DeleteFile(user.ProfilePictureData);
+            //}
 
-            string newProfilePhotoUrl = await _fileStorageService.SaveFileAsync(file, "Users"); // "Users" subfolder
-            user.ProfilePictureUrl = newProfilePhotoUrl;
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var imageData = memoryStream.ToArray();
+
+            user.ProfilePictureData = imageData;          
+            user.ProfilePictureContentType = file.ContentType;
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
@@ -414,7 +420,7 @@ namespace BookStoreApi.Controllers
                 Id = user.Id,
                 UserName = user.UserName!,
                 Email = user.Email!,
-                ProfilePictureUrl = user.ProfilePictureUrl
+                ProfilePictureUrl = Url.Action(nameof(GetProfilePhoto), "AccountController", new { id = user.Id }, Request.Scheme) 
             };
 
             return Ok(userDto);
@@ -429,13 +435,14 @@ namespace BookStoreApi.Controllers
                 return NotFound($"User with ID {id} not found.");
             }
 
-            if (string.IsNullOrEmpty(user.ProfilePictureUrl))
+            if (user.ProfilePictureData == null || user.ProfilePictureData.Length == 0)
             {
+                _logger.LogInformation("User with ID {UserId} does not have a profile photo to delete.", id);
                 return NotFound("User does not have a profile photo.");
             }
 
-            _fileStorageService.DeleteFile(user.ProfilePictureUrl);
-            user.ProfilePictureUrl = null; 
+            user.ProfilePictureData = null;
+            user.ProfilePictureContentType = null;
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
@@ -444,6 +451,90 @@ namespace BookStoreApi.Controllers
             }
 
             return NoContent(); 
+        }
+
+        [HttpGet("{id}/profile-photo")] // GET endpoint to retrieve the photo
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous] // Or [Authorize] if you want to restrict who can view photos
+        public async Task<IActionResult> GetProfilePhoto(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    _logger.LogInformation("User with ID {UserId} not found for profile photo retrieval.", id);
+                    return NotFound($"User with ID {id} not found.");
+                }
+
+                // Check if the user has profile picture data stored
+                if (user.ProfilePictureData == null || user.ProfilePictureData.Length == 0)
+                {
+                    _logger.LogInformation("Profile photo not found for user ID {UserId}.", id);
+                    // Optionally, return a default placeholder image here
+                    // Example: return File(System.IO.File.ReadAllBytes("wwwroot/images/default-profile.png"), "image/png");
+                    return NotFound("Profile photo not found.");
+                }
+
+                // Use the stored content type, or default if not available
+                string contentType = user.ProfilePictureContentType ?? "image/jpeg"; // Default to JPEG if type not stored
+
+                // Return the byte array as a file
+                return File(user.ProfilePictureData, contentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving profile photo for user ID {UserId}.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving the profile photo: {ex.Message}");
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var Users = await _userManager.Users.ToListAsync();
+            var userDtos = Users.Select(user => new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email
+            }).ToList();
+
+            return Ok(userDtos);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<UserDto>> GetUserById(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound($"User with ID {id} not found.");
+                }
+
+                var userDto = new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email
+                };
+
+                return Ok(userDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting user with ID {UserId}.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving user {id}.");
+            }
         }
     }
 }

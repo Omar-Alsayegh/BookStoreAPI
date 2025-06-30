@@ -6,6 +6,7 @@ using BookStoreApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BookStoreApi.Controllers
 {
@@ -44,6 +45,13 @@ namespace BookStoreApi.Controllers
         public async Task<ActionResult<PublisherDto>> CreatePublisher([FromBody] CreatePublisherDto createDto)
         {
             var newPublisherEntity = createDto.ToEntity();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            newPublisherEntity.CreatedAt = DateTime.UtcNow;
+            newPublisherEntity.CreatedBy = userId;
+            newPublisherEntity.ModifiedAt = DateTime.UtcNow;
+            newPublisherEntity.ModifiedBy = userId;
+
             await _publisherService.CreatePublisherAsync(newPublisherEntity);
             await _publisherService.SaveChangesAsync();
             var createdPublisherDto = newPublisherEntity.ToDto();

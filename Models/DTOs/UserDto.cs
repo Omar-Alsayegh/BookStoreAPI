@@ -7,5 +7,6 @@
         public string Email { get; set; } = string.Empty;
         // Add ProfilePictureUrl
         public string? ProfilePictureUrl { get; set; }
+        public IList<String> Roles {  get; set; }
     }
 }

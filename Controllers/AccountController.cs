@@ -493,18 +493,23 @@ namespace BookStoreApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var Users = await _userManager.Users.ToListAsync();
-            var userDtos = Users.Select(user => new UserDto
+            var users = await _userManager.Users.ToListAsync();
+            var userDtos = new List<UserDto>();
+            foreach (var user in users)
             {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email
-            }).ToList();
-
+                var roles = await _userManager.GetRolesAsync(user);
+                userDtos.Add(new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Roles = roles.ToList()
+                });
+            }
             return Ok(userDtos);
         }
 
-        [Authorize(Roles = "Admin")]
+       // [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -520,13 +525,15 @@ namespace BookStoreApi.Controllers
                 {
                     return NotFound($"User with ID {id} not found.");
                 }
-
-                var userDto = new UserDto
-                {
-                    Id = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email
-                };
+                    var roles = await _userManager.GetRolesAsync(user);
+                   var userDto = new UserDto
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        Roles = roles.ToList()
+                   };
+                
 
                 return Ok(userDto);
             }

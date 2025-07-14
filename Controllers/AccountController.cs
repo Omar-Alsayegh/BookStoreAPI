@@ -177,7 +177,8 @@ namespace BookStoreApi.Controllers
 
             try
             {
-                await _emailService.SendEmailAsync(user.Email, emailSubject, emailMessage);
+                ICollection<string> email = null;
+                await _emailService.SendEmailAsync(user.Email, emailSubject, emailMessage,email);
             }
             catch (Exception ex)
             {
@@ -332,9 +333,10 @@ namespace BookStoreApi.Controllers
             }
             return BadRequest(ModelState);
         }
+
         [HttpPost("CreateUser")]
         [Authorize (Roles ="Admin")]
-        public async Task<IActionResult> CreateUser(RegisterDto registerDto)
+        public async Task<IActionResult> CreateUser([FromBody] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
             {
@@ -377,7 +379,7 @@ namespace BookStoreApi.Controllers
 
         [HttpPut("{id}/profile-photo")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadProfilePhoto(string id, IFormFile file)
+        public async Task<IActionResult> UploadProfilePhoto([FromRoute] string id, IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -427,7 +429,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpDelete("{id}/profile-photo")]
-        public async Task<IActionResult> DeleteProfilePhoto(string id)
+        public async Task<IActionResult> DeleteProfilePhoto([FromRoute] string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -458,7 +460,7 @@ namespace BookStoreApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [AllowAnonymous] // Or [Authorize] if you want to restrict who can view photos
-        public async Task<IActionResult> GetProfilePhoto(string id)
+        public async Task<IActionResult> GetProfilePhoto([FromRoute] string id)
         {
             try
             {
@@ -516,7 +518,7 @@ namespace BookStoreApi.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<UserDto>> GetUserById(string id)
+        public async Task<ActionResult<UserDto>> GetUserById([FromRoute] string id)
         {
             try
             {

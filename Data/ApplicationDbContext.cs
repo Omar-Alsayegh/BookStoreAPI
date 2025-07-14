@@ -17,6 +17,7 @@ namespace BookStoreApi.Data
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<BookAuthor> BookAuthors { get; set; }
         public DbSet<Rental> Rentals { get; set; } = null!;
+        public DbSet<Wishlist> Wishlist { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,6 +79,21 @@ namespace BookStoreApi.Data
                 .HasForeignKey(bcp => bcp.BookId)   
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Wishlist>()
+                .HasOne(b => b.ApplicationUser)
+                .WithMany(b => b.WishlistItems)
+                .HasForeignKey(b => b.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Wishlist>()
+                .HasOne(b=> b.Book)
+                .WithMany()
+                .HasForeignKey(b => b.BookId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Wishlist>()
+                .HasIndex(wl => new { wl.ApplicationUserId, wl.BookId })
+                .IsUnique();
         }
     }
 }

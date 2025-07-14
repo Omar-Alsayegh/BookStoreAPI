@@ -6,7 +6,8 @@ namespace BookStoreApi.Services
 {
     public interface IAuthorService
     {
-        Task<IEnumerable<Author>> GetAllAuthorsAsync(AuthorQueryObject query);
+        //Task<IEnumerable<Author>> GetAllAuthorsAsync(AuthorQueryObject query);
+        Task<IEnumerable<Author>> GetFilteredAuthorsAsync(AuthorQueryObject query);
         Task<Author?> GetAuthorByIdAsync(int id);
         Task<Author> CreateAuthorAsync(Author author);
         Task<bool> UpdateAuthorAsync(Author author);

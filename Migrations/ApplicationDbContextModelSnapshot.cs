@@ -61,7 +61,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors");
+                    b.ToTable("Authors", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Book", b =>
@@ -122,7 +122,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.BookAuthor", b =>
@@ -137,7 +137,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("BookAuthors");
+                    b.ToTable("BookAuthors", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.BookImage", b =>
@@ -181,7 +181,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("BookImage");
+                    b.ToTable("BookImage", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Publisher", b =>
@@ -220,7 +220,7 @@ namespace BookStoreApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Publishers");
+                    b.ToTable("Publishers", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreApi.Entities.Rental", b =>
@@ -257,6 +257,9 @@ namespace BookStoreApi.Migrations
                     b.Property<DateTime?>("InactiveDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("LastReminderEmailSentDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
@@ -284,7 +287,54 @@ namespace BookStoreApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Rentals");
+                    b.ToTable("Rentals", (string)null);
+                });
+
+            modelBuilder.Entity("BookStoreApi.Entities.Wishlist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ArchiveReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("InactiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("ApplicationUserId", "BookId")
+                        .IsUnique();
+
+                    b.ToTable("Wishlist", (string)null);
                 });
 
             modelBuilder.Entity("BookStoreApi.Models.ApplicationUser", b =>
@@ -563,6 +613,25 @@ namespace BookStoreApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BookStoreApi.Entities.Wishlist", b =>
+                {
+                    b.HasOne("BookStoreApi.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("WishlistItems")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BookStoreApi.Entities.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Book");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -636,6 +705,8 @@ namespace BookStoreApi.Migrations
             modelBuilder.Entity("BookStoreApi.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Rentals");
+
+                    b.Navigation("WishlistItems");
                 });
 #pragma warning restore 612, 618
         }

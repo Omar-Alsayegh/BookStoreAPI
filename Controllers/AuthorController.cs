@@ -24,7 +24,8 @@ namespace BookStoreApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors([FromQuery] AuthorQueryObject query)
         {
-            var authors =await _authorService.GetAllAuthorsAsync(query);
+            //var authors =await _authorService.GetAllAuthorsAsync(query);
+            var authors = await _authorService.GetFilteredAuthorsAsync(query);
             var authorsDto = authors.Select(a => a.ToDto()).ToList();
             return Ok(authorsDto);
         }
@@ -66,7 +67,7 @@ namespace BookStoreApi.Controllers
 
         [Authorize (Roles ="Admin,Employee")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAuthor(int id, [FromBody] UpdateAuthorDto updateAuthor)
+        public async Task<IActionResult> UpdateAuthor([FromRoute] int id, [FromBody] UpdateAuthorDto updateAuthor)
         {
 
             var existingAuthors = await _authorService.GetAuthorByIdAsync(id);

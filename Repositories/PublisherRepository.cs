@@ -25,14 +25,15 @@ namespace BookStoreApi.Repositories
 
             if (!string.IsNullOrWhiteSpace(query.SortBy))
             {
-                switch (query.SortBy.ToLowerInvariant())
+                string sortByLower = query.SortBy.ToLowerInvariant();
+
+                if (sortByLower.Contains("name"))
                 {
-                    case "name":
-                        publishers = query.IsDescending ? publishers.OrderByDescending(p => p.Name) : publishers.OrderBy(p => p.Name);
-                        break;
-                    default:
-                        publishers = publishers.OrderBy(p => p.Id);
-                        break;
+                    publishers = query.IsDescending ? publishers.OrderByDescending(p => p.Name) : publishers.OrderBy(p => p.Name);
+                }
+                else
+                {
+                    publishers = publishers.OrderBy(p => p.Id);
                 }
             }
             var skipNumber = (query.PageNumber - 1) * query.PageSize;

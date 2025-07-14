@@ -18,5 +18,6 @@ namespace BookStoreApi.Models
 
         public DateTime? LastPasswordResetRequestUtc { get; set; }
         public ICollection<Rental> Rentals { get; set; }
+        public ICollection<Wishlist> WishlistItems { get; set; }
     }
 }

@@ -35,5 +35,7 @@ namespace BookStoreApi.Entities
 
         public RentalStatus Status { get; set; }
 
+        public DateTime? LastReminderEmailSentDate { get; set; }
+
     }
 }

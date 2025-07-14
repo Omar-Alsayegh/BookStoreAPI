@@ -6,6 +6,7 @@ namespace BookStoreApi.Models.DTOs
     public class RentalStatusUpdateRequestDto
     {
         public String? ReasonOfRejection { get; set; }
+        public RentalStatus rentalStatus { get; set; }
 
     }
 }

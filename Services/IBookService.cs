@@ -12,6 +12,9 @@ namespace BookStoreApi.Services
         Task<Book> CreateBookAsync(Book book);
         Task<bool> UpdateBookAsync(Book book);
         Task<bool> DeleteBookAsync(Book book);
+        Task<IEnumerable<Book>> GetBooksAddedSinceAsync(DateTimeOffset sinceDate);
+        Task<BookImage> GetBookImageAsync(int PhotoId);
+        Task<IEnumerable<Book>> GetFilteredBooksAsync(QueryObject query);
         Task SaveChangesAsync();
     }
 }

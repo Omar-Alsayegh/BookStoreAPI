@@ -6,6 +6,6 @@ namespace BookStoreApi.Repositories
     public interface IAuthorRepository : IGenericRepository<Author>
     {
 
-        Task<IEnumerable<Author>> GetAllAuthorsAsync(AuthorQueryObject query);
+        //Task<IEnumerable<Author>> GetAllAuthorsAsync(AuthorQueryObject query);
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -25,14 +26,14 @@ namespace BookStoreApi.Controllers
         private readonly IAuthorService _authorService;
         private readonly ILogger<BooksController> _logger;
         private readonly IFileStorageService _fileStorageService;
-        private readonly IGenericRepository<BookImage> _bookImageRepository;
-        public BooksController(IBookService bookService, IAuthorService authorService, ILogger<BooksController> logger, IFileStorageService fileStorageService, IGenericRepository<BookImage> bookImageRepository)
+        private readonly IMemoryCache _memoryCache;
+        public BooksController(IBookService bookService, IAuthorService authorService, ILogger<BooksController> logger, IFileStorageService fileStorageService, IMemoryCache memoryCache)
         {
             _bookService = bookService;
             _authorService = authorService;
             _logger = logger;
             _fileStorageService = fileStorageService;
-            _bookImageRepository = bookImageRepository;
+            _memoryCache = memoryCache;
         }
 
         [HttpGet]
@@ -44,14 +45,29 @@ namespace BookStoreApi.Controllers
         }
         // [Authorize (Roles ="Admin,Employee")]
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookDto>> GetBook(int id)
+        public async Task<ActionResult<BookDto>> GetBook([FromRoute] int id)
         {
+            var cacheKey = $"Book:{id}";
+            var bookDto = await _memoryCache.GetOrCreateAsync(cacheKey, async entry =>
+            {
+                entry.SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                _logger.LogInformation("Controller: Cache Miss for Book ID {BookId}. Fetching from service.", id);
+                var fetchedBookDto = await _bookService.GetBookByIdAsync(id);
+                if (fetchedBookDto == null)
+                {
+                    _logger.LogWarning("Book ID {BookId} not found by service, caching null.", id);
+                    return null; 
+                }
+                return fetchedBookDto;
+
+            });
             var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
             {
                 return NotFound();
             }
             var bookdto = book.ToBookDto();
+            _logger.LogInformation("Controller: Returning Book ID {BookId} (Cache Hit or just cached).", id);
             return Ok(book);
         }
         [Authorize(Roles = "Admin,Employee")]
@@ -113,7 +129,7 @@ namespace BookStoreApi.Controllers
         }
         [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{id}")]
-        public async Task<ActionResult<BookDto>> PutBook(int id, UpdateBookDto updateBook)
+        public async Task<ActionResult<BookDto>> PutBook([FromRoute] int id, UpdateBookDto updateBook)
         {
             var existingBook = await _bookService.GetBookByIdAsync(id);
             if (existingBook == null)
@@ -151,8 +167,8 @@ namespace BookStoreApi.Controllers
             try
             {
                 await _bookService.UpdateBookAsync(existingBook);
-
                 await _bookService.SaveChangesAsync();
+                _memoryCache.Remove($"Book_{id}");
 
                 return Ok(existingBook);
             }
@@ -169,7 +185,7 @@ namespace BookStoreApi.Controllers
         }
         [Authorize(Roles = "Admin,Employee")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(int id)
+        public async Task<IActionResult> DeleteBook([FromRoute] int id)
         {
             var BooktoDelete = await _bookService.GetBookByIdAsync(id);
             if (BooktoDelete == null)
@@ -178,13 +194,14 @@ namespace BookStoreApi.Controllers
             }
             await _bookService.DeleteBookAsync(BooktoDelete);
             await _bookService.SaveChangesAsync();
+            _memoryCache.Remove($"Book_{id}");
 
             return NoContent();
         }
 
         [HttpPut("{id}/cover-photo")]
         [Consumes("multipart/form-data")] 
-        public async Task<IActionResult> UploadBookCover(int id, IFormFile file)
+        public async Task<IActionResult> UploadBookCover([FromRoute] int id, IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -223,7 +240,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpDelete("{id}/cover-photo")]
-        public async Task<IActionResult> DeleteBookCover(int id)
+        public async Task<IActionResult> DeleteBookCover([FromRoute] int id)
         {
             var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
@@ -321,11 +338,11 @@ namespace BookStoreApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetBookContentPhoto(int photoId)
+        public async Task<IActionResult> GetBookContentPhoto([FromRoute] int photoId)
         {
             try
             {
-                var bookImage = await _bookImageRepository.GetByIdAsync(photoId);
+                var bookImage = await _bookService.GetBookImageAsync(photoId);
 
                 if (bookImage == null || bookImage.ImageUrl == null || bookImage.ImageUrl.Length == 0)
                 {

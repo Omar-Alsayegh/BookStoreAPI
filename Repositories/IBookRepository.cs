@@ -1,6 +1,7 @@
 ﻿
 using BookStoreApi.Entities;
 using BookStoreApi.Extra;
+using BookStoreApi.Models.DTOs;
 
 namespace BookStoreApi.Repositories
 {
@@ -9,6 +10,7 @@ namespace BookStoreApi.Repositories
         Task<IEnumerable<Book>> GetFilteredBooksQueryAsync(QueryObject query);
         Task<Book> GetBookWithAuthorsAsync(string bookTitle);
         Task<Book?> GetByIdAsync(int id);
+        Task<IEnumerable<Book>> GetBooksAddedSinceAsync(DateTimeOffset sinceDate);
 
         // Task<IEnumerable<Book>> GetBooksByAuthorAsync(string authorName);
     }

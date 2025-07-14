@@ -1,6 +1,7 @@
 ﻿using BookStoreApi.Data;
 using BookStoreApi.Entities;
 using BookStoreApi.Extra;
+using BookStoreApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreApi.Repositories
@@ -75,20 +76,26 @@ namespace BookStoreApi.Repositories
             // Apply Sorting
             if (!string.IsNullOrWhiteSpace(query.SortBy))
             {
-                switch (query.SortBy.ToLowerInvariant()) // Changed to Invariant for consistency
+                string sortByLower = query.SortBy.ToLowerInvariant();
+
+                if (sortByLower.Contains("title"))
                 {
-                    case "title":
-                        booksQuery = query.IsDescending ? booksQuery.OrderByDescending(b => b.Title) : booksQuery.OrderBy(b => b.Title);
-                        break;
-                    case "publicationyear":
-                        booksQuery = query.IsDescending ? booksQuery.OrderByDescending(b => b.PublicationYear) : booksQuery.OrderBy(b => b.PublicationYear);
-                        break;
-                    case "publishername":
-                        booksQuery = query.IsDescending ? booksQuery.OrderByDescending(b => b.Publisher.Name) : booksQuery.OrderBy(b => b.Publisher.Name);
-                        break;
-                    default:
-                        booksQuery = booksQuery.OrderBy(b => b.Id);
-                        break;
+                    booksQuery = query.IsDescending ? booksQuery.OrderByDescending(b => b.Title) : booksQuery.OrderBy(b => b.Title);
+                }
+                else if (sortByLower.Contains("publicationyear") || sortByLower.Contains("year")) // Added "year" as an alternative
+                {
+                    booksQuery = query.IsDescending ? booksQuery.OrderByDescending(b => b.PublicationYear) : booksQuery.OrderBy(b => b.PublicationYear);
+                }
+                else if (sortByLower.Contains("publishername") || sortByLower.Contains("publisher")) // Added "publisher" as an alternative
+                {
+                    booksQuery = query.IsDescending
+                        ? booksQuery.OrderByDescending(b => b.Publisher != null ? b.Publisher.Name : string.Empty)
+                        : booksQuery.OrderBy(b => b.Publisher != null ? b.Publisher.Name : string.Empty);
+                }
+                else
+                {
+                    // Default sort if no specific match is found for SortBy content
+                    booksQuery = booksQuery.OrderBy(b => b.Id);
                 }
             }
             else
@@ -96,7 +103,6 @@ namespace BookStoreApi.Repositories
                 booksQuery = booksQuery.OrderBy(b => b.Id);
             }
 
-            // Apply Pagination - CRITICAL FIX!
             var skipNumber = (query.PageNumber - 1) * query.PageSize;
             booksQuery = booksQuery.Skip(skipNumber).Take(query.PageSize);
 
@@ -111,6 +117,15 @@ namespace BookStoreApi.Repositories
                .Include(b => b.Publisher)
         .Include(b => b.BookContentPhotos)
            .FirstOrDefaultAsync(b => b.Title == bookTitle);
+        }
+        public async Task<IEnumerable<Book>> GetBooksAddedSinceAsync(DateTimeOffset sinceDate)
+        {
+            return await _dbSet
+                .Where(b => b.CreatedAt >= sinceDate)
+                .Include(b => b.Publisher)
+                .Include(b => b.BookAuthors)
+                    .ThenInclude(ba => ba.Author)
+                .ToListAsync();
         }
     }
 }

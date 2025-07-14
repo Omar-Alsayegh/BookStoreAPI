@@ -1,13 +1,16 @@
 ﻿using BookStoreApi.Data;
 using BookStoreApi.Entities;
+using BookStoreApi.Extra;
 using BookStoreApi.Models;
 using BookStoreApi.Models.DTOs;
+using BookStoreApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BookStoreApi.Controllers
 {
@@ -18,17 +21,89 @@ namespace BookStoreApi.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<RentalsController> _logger;
+        private readonly IRentalService _rentalServicess;
 
-        public RentalsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<RentalsController> logger)
+        public RentalsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<RentalsController> logger,IRentalService servicess)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _rentalServicess = servicess;
         }
 
         [HttpGet("All")]
-        public async Task<ActionResult<IEnumerable<RentalDto>>> GetAllRentals()
+        public async Task<ActionResult<IEnumerable<RentalDto>>> GetAllRentals([FromQuery] RentalQueryObject query)
         {
+            var rentalsQuery = _context.Rentals
+            .Include(r => r.Book)
+            .Include(r => r.User)
+            .AsQueryable();
+            if (!string.IsNullOrWhiteSpace(query.BookTitle))
+            {
+                rentalsQuery = rentalsQuery.Where(r => r.Book != null && r.Book.Title.ToLower().Contains(query.BookTitle.ToLower()));
+            }
+            if (!string.IsNullOrWhiteSpace(query.CustomerEmail))
+            {
+                rentalsQuery = rentalsQuery.Where(r => r.User != null && r.User.Email != null && r.User.Email.ToLower().Contains(query.CustomerEmail.ToLower()));
+            }
+
+            if (query.Status.HasValue)
+            {
+                rentalsQuery = rentalsQuery.Where(r => r.Status == query.Status.Value);
+            }
+
+            if (query.RentalDateFrom.HasValue)
+            {
+                rentalsQuery = rentalsQuery.Where(r => r.RentalDate >= query.RentalDateFrom.Value);
+            }
+
+            if (query.RentalDateTo.HasValue)
+            {
+                rentalsQuery = rentalsQuery.Where(r => r.RentalDate <= query.RentalDateTo.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                string sortByLower = query.SortBy.ToLowerInvariant();
+
+                if (sortByLower.Contains("rentaldate") || sortByLower.Contains("date"))
+                {
+                    rentalsQuery = query.IsDescending ? rentalsQuery.OrderByDescending(r => r.RentalDate) : rentalsQuery.OrderBy(r => r.RentalDate);
+                }
+                else if (sortByLower.Contains("booktitle") || sortByLower.Contains("title"))
+                {
+                    rentalsQuery = query.IsDescending
+                        ? rentalsQuery.OrderByDescending(r => r.Book != null ? r.Book.Title : string.Empty)
+                        : rentalsQuery.OrderBy(r => r.Book != null ? r.Book.Title : string.Empty);
+                }
+                else if (sortByLower.Contains("customeremail") || sortByLower.Contains("email"))
+                {
+                    rentalsQuery = query.IsDescending
+                        ? rentalsQuery.OrderByDescending(r => r.User != null && r.User.Email != null ? r.User.Email : string.Empty)
+                        : rentalsQuery.OrderBy(r => r.User != null && r.User.Email != null ? r.User.Email : string.Empty);
+                }
+                else if (sortByLower.Contains("status"))
+                {
+                    rentalsQuery = query.IsDescending ? rentalsQuery.OrderByDescending(r => r.Status) : rentalsQuery.OrderBy(r => r.Status);
+                }
+                else
+                {
+                    rentalsQuery = rentalsQuery.OrderByDescending(r => r.RentalDate); 
+                }
+            }
+            else
+            {
+                rentalsQuery = rentalsQuery.OrderByDescending(r => r.RentalDate);
+            }
+
+            query.PageNumber = Math.Max(1, query.PageNumber);
+
+            var skipAmount = (query.PageNumber - 1) * query.PageSize;
+
+            rentalsQuery = rentalsQuery
+                .Skip(skipAmount)
+                .Take(query.PageSize);
+
+
             var rentals = await _context.Rentals
                 .Include(r => r.Book)
                 .Include(r => r.User)
@@ -83,6 +158,7 @@ namespace BookStoreApi.Controllers
             _logger.LogInformation("Retrieved {Count} rentals for User ID {UserId}.", rentals.Count, userId);
             return Ok(rentals);
         }
+
         [Authorize(Roles = "Admin,Employee,Customer")]
         [HttpPost]
         public async Task<IActionResult> AddRentalAsync([FromBody] RentalRequestDto request) { 
@@ -113,7 +189,8 @@ namespace BookStoreApi.Controllers
                 _logger.LogInformation("User {UserId} already has an active rental and cannot rent again.", user);
                 return Conflict("You already have an active rental and cannot rent another book at this time.");
             }
-
+            var days=request.DesiredDurationDays;
+            var time = _rentalServicess.FixTime(DateTime.UtcNow, days);
             var rental = new Rental
             {
                 BookId = request.BookId,
@@ -121,7 +198,7 @@ namespace BookStoreApi.Controllers
                 RentalDate = DateTime.UtcNow,
                 ApprovedBy = null,
                 Status = RentalStatus.Pending,
-                ExpectedReturnDate =null,
+                ExpectedReturnDate =time,
                 CreatedBy = user,    
                 ModifiedBy = user,
                 CreatedAt = DateTime.UtcNow, 
@@ -137,7 +214,7 @@ namespace BookStoreApi.Controllers
 
         [HttpPut]
         [Authorize(Roles = "Admin,Employee")]
-        public async Task<IActionResult> RentalStatusResponse(int id, [FromQuery] RentalStatus statusResponse, [FromQuery] RentalStatusUpdateRequestDto response)
+        public async Task<IActionResult> RentalStatusResponse([FromQuery] int id, [FromBody] RentalStatusUpdateRequestDto response)
         {
             var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (user == null)
@@ -145,6 +222,7 @@ namespace BookStoreApi.Controllers
                 _logger.LogInformation("AcceptRental failed: User {User} not found.",user);
                 return NotFound("User not found");
             }
+
             var rental = await _context.Rentals
                 .Include(r => r.Book)
                 .Include(r => r.User)
@@ -164,11 +242,13 @@ namespace BookStoreApi.Controllers
                 _logger.LogInformation("AcceptRental failed: The book with Id {Bookid} is out of stock or not found.", id);
                 return NotFound("Book not found");
             }
-            if (statusResponse == RentalStatus.Accepted)
+            if (response.rentalStatus == RentalStatus.Accepted)
             {
                 rental.Status = RentalStatus.Accepted;
                 rental.Book.StockQuantity--;
                 rental.ApprovedBy = user;
+                rental.ModifiedBy = user;
+                rental.CreatedBy = user;
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Rental ID {RentalId} for Book '{BookTitle}' accepted by {AcceptorRole}. New stock: {NewStock}.",
                                    id, rental.Book.Title, User.Identity!.Name, rental.Book.StockQuantity);
@@ -179,6 +259,8 @@ namespace BookStoreApi.Controllers
             {
                 rental.Status = RentalStatus.Rejected;
                 rental.ApprovedBy = "Not Approved By "+user;
+                rental.ModifiedBy = user;
+                rental.CreatedBy = user;
                 rental.ReasonOfRejection =response.ReasonOfRejection;
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Rental Rejection success");

@@ -14,6 +14,6 @@ namespace BookStoreApi.Models.DTOs
         public string? ApprovedBy { get; set; }
         public string? ReasonOfRejection { get; set; }
         public RentalStatus Status { get; set; }
-        
+        public DateTime? LastReminderEmailSentDate { get; set; } 
     }
 }

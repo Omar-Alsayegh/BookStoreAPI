@@ -59,7 +59,7 @@ namespace BookStoreApi.Controllers
         }
         [Authorize(Roles ="Admin,Employee")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePublisher(int id, [FromBody] UpdatePublisherDto updateDto)
+        public async Task<IActionResult> UpdatePublisher([FromRoute] int id, [FromBody] UpdatePublisherDto updateDto)
         {
             var existingPublisherEntity = await _publisherService.GetPublisherByIdAsync(id);
             if (existingPublisherEntity == null)

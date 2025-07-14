@@ -1,7 +1,12 @@
+using BookStoreApi;
+using BookStoreApi.Configurations;
 using BookStoreApi.Data;
 using BookStoreApi.Extensions;
 using BookStoreApi.Repositories;
+using BookStoreApi.Services;
+using BookStoreApi.Services.Email;
 using BookStoreApi.Services.FileStorage;
+using BookStoreApi.Sheduled_Tasks;
 using Microsoft.Extensions.FileProviders;
 using NLog;
 using NLog.Web;
@@ -31,10 +36,24 @@ try
     builder.Services.AddGlobalExceptionHandler();
     builder.Services.AddControllers();
     builder.Services.AddAppFluentValidation();
+    builder.Services.AddScoped<IWishlistRepository, WishlistRepository>();
+    builder.Services.AddScoped<IWishlistService, WishlistService>();
+    builder.Services.AddMemoryCache();
 
     builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
-    
+    builder.Services.AddScoped<INewArrivalsProcessor, NewArrivalsProcessor>();
+    builder.Services.AddHostedService<NewArrivalsNewsletterScheduler>();
+
+    builder.Services.AddHostedService<RentalReminderService>();
+    builder.Services.AddScoped<INotificationService, NotificationService>();
+
+    builder.Services.AddScoped<IEmailService,SmtpEmailService>();
+
+    builder.Services.AddScoped<IRentalService,RentalService>();
+
+    builder.Services.Configure<BackgroundServiceSettings>(
+    builder.Configuration.GetSection("BackgroundServices"));
 
 
     var app = builder.Build();

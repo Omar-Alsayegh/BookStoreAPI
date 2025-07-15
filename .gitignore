@@ -31,3 +31,6 @@ appsettings.Development.json
 
 .vs/
 **/.vs/
+
+**/.git
+
